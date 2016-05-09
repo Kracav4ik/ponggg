@@ -1,0 +1,6 @@
+Thumbs.db
+ehthumbs.db
+*.pyc
+build
+dist
+*.spec
