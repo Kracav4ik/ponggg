@@ -19,6 +19,13 @@ def handle_input():
     for event in events:
         if event.type == pygame.QUIT:
             sys.exit()
+        elif event.type == pygame.KEYDOWN:
+            # клавиатура
+            print('event', event)
+            if event.key == pygame.K_ESCAPE:
+                sys.exit()
+            elif event.key == pygame.K_SPACE:
+                print('SPAAAAAAAAAAAAAAAAAAAAACE!!!11')
 
 
 def process_game():
