@@ -11,10 +11,12 @@ pygame.init()
 
 WINDOW_SIZE = (1280, 720)  # размер окна в пикселах
 WINDOW_BG_COLOR = (0, 0, 0)  # цвет окна
+OFFSET = 50
 
 window_surface = pygame.display.set_mode(WINDOW_SIZE)
 screen = Screen(window_surface)
-backyblacky = Blackground()
+width, height = screen.get_size()
+backyblacky = Blackground(OFFSET, OFFSET, width - 2 * OFFSET, height - 2 * OFFSET)
 magic_ball = Ball(250, 150, 50)
 
 

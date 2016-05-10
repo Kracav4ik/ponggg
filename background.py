@@ -2,14 +2,17 @@
 
 
 class Blackground:
+    def __init__(self, pix_x, pix_y, width, height):
+        self.width = width
+        self.pix_y = pix_y
+        self.pix_x = pix_x
+        self.height = height
+
     def render(self, screen):
         """
         :type screen: screen.Screen
         """
-        offset_x = 50
-        offset_y = 50
-        frame_color = 255, 255, 255
-        width, height = screen.get_size()
         frame_thickness = 2
+        frame_color = (255, 255, 255)
 
-        screen.draw_frame(frame_color, offset_x, offset_y, width - 2 * offset_x, height - 2 * offset_y, frame_thickness)
+        screen.draw_frame(frame_color, self.pix_x, self.pix_y, self.width, self.height, frame_thickness)
