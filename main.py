@@ -6,6 +6,7 @@ import sys
 from background import Blackground
 from ball import Ball
 from screen import Screen
+from utils import Vec2d
 
 pygame.init()
 
@@ -17,7 +18,9 @@ window_surface = pygame.display.set_mode(WINDOW_SIZE)
 screen = Screen(window_surface)
 width, height = screen.get_size()
 backyblacky = Blackground(OFFSET, OFFSET, width - 2 * OFFSET, height - 2 * OFFSET)
-magic_ball = Ball(250, 150, 50)
+BALL_X = 250
+BALL_Y = 150
+magic_ball = Ball(BALL_X, BALL_Y, 50)
 
 
 def handle_input():
@@ -33,12 +36,14 @@ def handle_input():
             if event.key == pygame.K_ESCAPE:
                 sys.exit()
             elif event.key == pygame.K_SPACE:
+                magic_ball.pos = Vec2d(BALL_X, BALL_Y)
                 print('SPAAAAAAAAAAAAAAAAAAAAACE!!!11')
 
 
-def process_game():
+def process_game(elapsed):
     """Подвинуть игровые объекты
     """
+    magic_ball.pos += magic_ball.speed*elapsed
 
 
 def render():
@@ -56,5 +61,5 @@ def render():
 # игровой цикл
 while True:
     handle_input()
-    process_game()
+    process_game(0.5)
     render()
