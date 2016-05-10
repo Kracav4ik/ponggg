@@ -6,7 +6,7 @@ import sys
 from background import Blackground
 from ball import Ball
 from screen import Screen
-from utils import Vec2d
+from utils import Vec2d, random_vector
 
 pygame.init()
 
@@ -18,9 +18,11 @@ window_surface = pygame.display.set_mode(WINDOW_SIZE)
 screen = Screen(window_surface)
 width, height = screen.get_size()
 backyblacky = Blackground(OFFSET, OFFSET, width - 2 * OFFSET, height - 2 * OFFSET)
-BALL_X = 250
-BALL_Y = 150
+BALL_X = width/2
+BALL_Y = height/2
+BALL_SPEED = 350
 magic_ball = Ball(BALL_X, BALL_Y, 50)
+magic_ball.speed = BALL_SPEED * random_vector()
 
 
 def handle_input():
@@ -37,6 +39,7 @@ def handle_input():
                 sys.exit()
             elif event.key == pygame.K_SPACE:
                 magic_ball.pos = Vec2d(BALL_X, BALL_Y)
+                magic_ball.speed = BALL_SPEED * random_vector()
                 print('SPAAAAAAAAAAAAAAAAAAAAACE!!!11')
 
 
@@ -58,8 +61,13 @@ def render():
     pygame.display.flip()
 
 
+MAX_FPS = 50
+clock = pygame.time.Clock()
+clock.tick()
 # игровой цикл
 while True:
+    elapsed = clock.tick(MAX_FPS)
+
     handle_input()
-    process_game(0.5)
+    process_game(elapsed/1000)
     render()

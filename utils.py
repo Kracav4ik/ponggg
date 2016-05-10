@@ -2,6 +2,7 @@
 import numbers
 
 import math
+import random
 
 
 class Vec2d:
@@ -131,3 +132,7 @@ def max_coords(v1, v2):
 
 def unit_vector(angle):
     return Vec2d(math.sin(angle), math.cos(angle))
+
+
+def random_vector():
+    return unit_vector(random.random() * 2 * math.pi)

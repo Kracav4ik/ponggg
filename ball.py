@@ -18,7 +18,7 @@ class Ball:
     def __init__(self, x, y, r):
         self.pos = Vec2d(x, y)
         self.r = r
-        self.speed = Vec2d(2, 1)
+        self.speed = Vec2d()
 
     def render(self, screen):
         """
