@@ -4,6 +4,7 @@ import pygame
 import sys
 
 from background import Blackground
+from ball import Ball
 from screen import Screen
 
 pygame.init()
@@ -14,6 +15,8 @@ WINDOW_BG_COLOR = (0, 0, 0)  # цвет окна
 window_surface = pygame.display.set_mode(WINDOW_SIZE)
 screen = Screen(window_surface)
 backyblacky = Blackground()
+magic_ball = Ball(250, 150, 50)
+
 
 def handle_input():
     """Обработка input от игрока
@@ -43,6 +46,7 @@ def render():
     main_screen.fill(WINDOW_BG_COLOR)
 
     backyblacky.render(screen)
+    magic_ball.render(screen)
 
     pygame.display.flip()
 

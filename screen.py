@@ -55,8 +55,8 @@ class Screen:
                 y_max = y
             if y_min > y:
                 y_min = y
-        width = x_max - x_min
-        height = y_max - y_min
+        width = x_max - x_min + 1
+        height = y_max - y_min + 1
 
         surface_points = []
         for x, y in points_list:
