@@ -8,6 +8,10 @@ class Vec2d:
     """Двумерный вектор"""
 
     def __init__(self, x=0, y=0):
+        """
+        :type x: int|float
+        :type y: int|float
+        """
         self.data = (x, y)
 
     @property
@@ -123,3 +127,7 @@ def max_coords(v1, v2):
     :type v2: Vec2d
     """
     return apply2(v1, v2, max)
+
+
+def unit_vector(angle):
+    return Vec2d(math.sin(angle), math.cos(angle))

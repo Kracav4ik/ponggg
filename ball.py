@@ -1,7 +1,7 @@
 # encoding: utf-8
 from math import *
 
-from utils import Vec2d
+from utils import Vec2d, unit_vector
 
 BALL_COLOR = (255, 128, 128)
 
@@ -10,7 +10,7 @@ def circle_vertices(pos, r, n=32):
     result = []
     a = 2 * pi / n
     for i in range(n):
-        result.append(pos + r * Vec2d(sin(a * i), cos(a * i)))
+        result.append(pos + r * unit_vector(a * i))
     return result
 
 
