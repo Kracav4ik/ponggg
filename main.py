@@ -20,7 +20,7 @@ width, height = screen.get_size()
 backyblacky = Blackground(OFFSET, OFFSET, width - 2 * OFFSET, height - 2 * OFFSET)
 BALL_X = width / 2
 BALL_Y = height / 2
-BALL_SPEED = 350
+BALL_SPEED = 1350
 magic_ball = Ball(BALL_X, BALL_Y, 50)
 magic_ball.speed = BALL_SPEED * random_vector()
 
@@ -56,41 +56,14 @@ def process_game(elapsed):
     new_width = width - OFFSET
     new_height = height - OFFSET
 
-    if left.x <= OFFSET and up.y <= OFFSET:
-        if v.x <= 0 and v.y <= 0:
-            magic_ball.speed = Vec2d(-v.x, -v.y)
-        elif v.x <= 0:
-            magic_ball.speed = Vec2d(-v.x, v.y)
-        elif v.y <= 0:
-            magic_ball.speed = Vec2d(v.x, -v.y)
-    elif left.x <= OFFSET and down.y >= new_height:
-        if v.x <= 0 <= v.y:
-            magic_ball.speed = Vec2d(-v.x, -v.y)
-        elif v.x <= 0:
-            magic_ball.speed = Vec2d(-v.x, v.y)
-        elif v.y >= 0:
-            magic_ball.speed = Vec2d(v.x, -v.y)
-    elif right.x >= new_width and up.y <= OFFSET:
-        if v.x >= 0 >= v.y:
-            magic_ball.speed = Vec2d(-v.x, -v.y)
-        elif v.x >= 0:
-            magic_ball.speed = Vec2d(-v.x, v.y)
-        elif v.y <= 0:
-            magic_ball.speed = Vec2d(v.x, -v.y)
-    elif right.x >= new_width and down.y >= new_height:
-        if v.x >= 0 and v.y >= 0:
-            magic_ball.speed = Vec2d(-v.x, -v.y)
-        elif v.x >= 0:
-            magic_ball.speed = Vec2d(-v.x, v.y)
-        elif v.y >= 0:
-            magic_ball.speed = Vec2d(v.x, -v.y)
-    elif left.x <= OFFSET:
+    if left.x <= OFFSET:
         if v.x <= 0:
             magic_ball.speed = Vec2d(-v.x, v.y)
     elif right.x >= new_width:
         if v.x >= 0:
             magic_ball.speed = Vec2d(-v.x, v.y)
-    elif up.y <= OFFSET:
+
+    if up.y <= OFFSET:
         if v.y <= 0:
             magic_ball.speed = Vec2d(v.x, -v.y)
     elif down.y >= new_height:
