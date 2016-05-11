@@ -56,12 +56,46 @@ def process_game(elapsed):
     new_width = width - OFFSET
     new_height = height - OFFSET
 
-    if left.x <= OFFSET and up.y <= OFFSET or left.x <= OFFSET and down.y >= new_height or right.x >= new_width and up.y <= OFFSET or right.x >= new_width and down.y >= new_height:
-        magic_ball.speed = Vec2d(-v.x, -v.y)
-    elif left.x <= OFFSET or right.x >= new_width:
-        magic_ball.speed = Vec2d(-v.x, v.y)
-    elif up.y <= OFFSET or down.y >= new_height:
-        magic_ball.speed = Vec2d(v.x, -v.y)
+    if left.x <= OFFSET and up.y <= OFFSET:
+        if v.x <= 0 and v.y <= 0:
+            magic_ball.speed = Vec2d(-v.x, -v.y)
+        elif v.x <= 0:
+            magic_ball.speed = Vec2d(-v.x, v.y)
+        elif v.y <= 0:
+            magic_ball.speed = Vec2d(v.x, -v.y)
+    elif left.x <= OFFSET and down.y >= new_height:
+        if v.x <= 0 <= v.y:
+            magic_ball.speed = Vec2d(-v.x, -v.y)
+        elif v.x <= 0:
+            magic_ball.speed = Vec2d(-v.x, v.y)
+        elif v.y >= 0:
+            magic_ball.speed = Vec2d(v.x, -v.y)
+    elif right.x >= new_width and up.y <= OFFSET:
+        if v.x >= 0 >= v.y:
+            magic_ball.speed = Vec2d(-v.x, -v.y)
+        elif v.x >= 0:
+            magic_ball.speed = Vec2d(-v.x, v.y)
+        elif v.y <= 0:
+            magic_ball.speed = Vec2d(v.x, -v.y)
+    elif right.x >= new_width and down.y >= new_height:
+        if v.x >= 0 and v.y >= 0:
+            magic_ball.speed = Vec2d(-v.x, -v.y)
+        elif v.x >= 0:
+            magic_ball.speed = Vec2d(-v.x, v.y)
+        elif v.y >= 0:
+            magic_ball.speed = Vec2d(v.x, -v.y)
+    elif left.x <= OFFSET:
+        if v.x <= 0:
+            magic_ball.speed = Vec2d(-v.x, v.y)
+    elif right.x >= new_width:
+        if v.x >= 0:
+            magic_ball.speed = Vec2d(-v.x, v.y)
+    elif up.y <= OFFSET:
+        if v.y <= 0:
+            magic_ball.speed = Vec2d(v.x, -v.y)
+    elif down.y >= new_height:
+        if v.y >= 0:
+            magic_ball.speed = Vec2d(v.x, -v.y)
 
 
 def render():
