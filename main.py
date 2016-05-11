@@ -18,8 +18,8 @@ window_surface = pygame.display.set_mode(WINDOW_SIZE)
 screen = Screen(window_surface)
 width, height = screen.get_size()
 backyblacky = Blackground(OFFSET, OFFSET, width - 2 * OFFSET, height - 2 * OFFSET)
-BALL_X = width/2
-BALL_Y = height/2
+BALL_X = width / 2
+BALL_Y = height / 2
 BALL_SPEED = 350
 magic_ball = Ball(BALL_X, BALL_Y, 50)
 magic_ball.speed = BALL_SPEED * random_vector()
@@ -46,7 +46,22 @@ def handle_input():
 def process_game(elapsed):
     """Подвинуть игровые объекты
     """
-    magic_ball.pos += magic_ball.speed*elapsed
+    magic_ball.pos += magic_ball.speed * elapsed
+    v = magic_ball.speed
+    r = magic_ball.r
+    left = magic_ball.pos - Vec2d(r, 0)
+    right = magic_ball.pos + Vec2d(r, 0)
+    up = magic_ball.pos - Vec2d(0, r)
+    down = magic_ball.pos + Vec2d(0, r)
+    new_width = width - OFFSET
+    new_height = height - OFFSET
+
+    if left.x <= OFFSET and up.y <= OFFSET or left.x <= OFFSET and down.y >= new_height or right.x >= new_width and up.y <= OFFSET or right.x >= new_width and down.y >= new_height:
+        magic_ball.speed = Vec2d(-v.x, -v.y)
+    elif left.x <= OFFSET or right.x >= new_width:
+        magic_ball.speed = Vec2d(-v.x, v.y)
+    elif up.y <= OFFSET or down.y >= new_height:
+        magic_ball.speed = Vec2d(v.x, -v.y)
 
 
 def render():
@@ -69,5 +84,5 @@ while True:
     elapsed = clock.tick(MAX_FPS)
 
     handle_input()
-    process_game(elapsed/1000)
+    process_game(elapsed / 1000)
     render()
