@@ -66,6 +66,35 @@ class Screen:
         pygame.draw.polygon(poly_surface, color, surface_points)
         self.surface.blit(poly_surface, (x_min, y_min))
 
+    def draw_polyline(self, color, points_list, loop=False, thickness=1):
+        """Рисуем ломаную линию
+        color - Цвет, список из 3-х или 4-х чисел 0..255 (R, G, B) или (R, G, B, A), A == 0
+        points_list - список вершин многоугольника
+        thickness - Толщина рамки в пикселях (по умолчанию 1)
+        loop - если True, рисует дополнительную линию от конца к началу
+        """
+        x_min, y_min = points_list[0]
+        x_max, y_max = x_min, y_min
+        for x, y in points_list:
+            if x_max < x:
+                x_max = x
+            if x_min > x:
+                x_min = x
+            if y_max < y:
+                y_max = y
+            if y_min > y:
+                y_min = y
+        width = x_max - x_min + 1 + thickness*2
+        height = y_max - y_min + 1 + thickness*2
+
+        surface_points = []
+        for x, y in points_list:
+            surface_points.append([x - x_min + thickness, y - y_min + thickness])
+
+        poly_surface = pygame.Surface((width, height), flags=pygame.SRCALPHA)
+        pygame.draw.lines(poly_surface, color, loop, surface_points, thickness)
+        self.surface.blit(poly_surface, (x_min - thickness, y_min - thickness))
+
     def draw_text(self, text, font, color, pix_x, pix_y, pix_w, pix_h):
         """Рисуем текст так, чтобы центр нарисованного текста был в центре заданного прямоугольника
         text - Текст
@@ -80,13 +109,13 @@ class Screen:
         text_y = pix_y + pix_h // 2 - text_surface.get_height() // 2
         self.surface.blit(text_surface, (text_x, text_y))
 
-    def draw_frame(self, color, pix_x, pix_y, pix_w, pix_h, thickness):
+    def draw_frame(self, color, pix_x, pix_y, pix_w, pix_h, thickness=1):
         """Рисуем прямоугольную рамку
         color - Цвет, список из 3-х чисел 0..255
         pix_x, pix_y - координаты левого верхнего угла в пикселях
         pix_w - Ширина в пикселях
         pix_h - Высота в пикселях
-        thickness - Толщина рамки в пикселях
+        thickness - Толщина рамки в пикселях (по умолчанию 1)
         """
         pygame.draw.rect(self.surface, color, (pix_x, pix_y, pix_w, pix_h), thickness)
 

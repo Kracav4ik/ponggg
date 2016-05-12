@@ -24,4 +24,4 @@ class Ball:
         """
         :type screen: screen.Screen
         """
-        screen.draw_polygon(BALL_COLOR, circle_vertices(self.pos, self.r))
+        screen.draw_polyline(BALL_COLOR, circle_vertices(self.pos, self.r), True, 2)
