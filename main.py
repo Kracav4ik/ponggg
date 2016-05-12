@@ -1,4 +1,5 @@
 # encoding: utf-8
+import random
 
 import pygame
 import sys
@@ -6,7 +7,7 @@ import sys
 from background import Blackground
 from ball import Ball
 from screen import Screen
-from utils import Vec2d, random_vector
+from utils import Vec2d, random_vector, dot
 
 pygame.init()
 
@@ -21,8 +22,23 @@ backyblacky = Blackground(OFFSET, OFFSET, width - 2 * OFFSET, height - 2 * OFFSE
 BALL_X = width / 2
 BALL_Y = height / 2
 BALL_SPEED = 1350
-magic_ball = Ball(BALL_X, BALL_Y, 50)
-magic_ball.speed = BALL_SPEED * random_vector()
+
+
+def create_balls():
+    magic_ball = Ball(BALL_X, BALL_Y, 50)
+    magic_ball.speed = BALL_SPEED * random_vector()
+
+    result = [magic_ball]
+    for x in (-1, 0, 1):
+        for y in (-1, 0, 1):
+            if x == 0 and y == 0:
+                continue
+            result.append(Ball(BALL_X + 150 * x, BALL_Y + 150 * y, random.randint(10, 40)))
+
+    return result
+
+
+balls_list = create_balls()
 
 
 def handle_input():
@@ -38,37 +54,77 @@ def handle_input():
             if event.key == pygame.K_ESCAPE:
                 sys.exit()
             elif event.key == pygame.K_SPACE:
-                magic_ball.pos = Vec2d(BALL_X, BALL_Y)
-                magic_ball.speed = BALL_SPEED * random_vector()
+                global balls_list
+                balls_list = create_balls()
                 print('SPAAAAAAAAAAAAAAAAAAAAACE!!!11')
+
+
+def collide_circles(obj1, obj2):
+    """
+    :type obj1: Ball
+    :type obj2: Ball
+    """
+    t = (obj1.pos - obj2.pos).norm()
+    n = Vec2d(t.y, -t.x)
+    u1 = dot(obj1.speed, n)*n + dot(obj2.speed, t)*t
+    u2 = dot(obj2.speed, n)*n + dot(obj1.speed, t)*t
+    obj1.speed = u1
+    obj2.speed = u2
+
+
+def circles_overlap(obj1, obj2):
+    """
+    :type obj1: Ball
+    :type obj2: Ball
+    """
+    return (obj1.pos - obj2.pos).len() <= obj2.r + obj1.r
+
+
+def try_collide_with_border(obj):
+    v = obj.speed
+    r = obj.r
+    left = obj.pos - Vec2d(r, 0)
+    right = obj.pos + Vec2d(r, 0)
+    up = obj.pos - Vec2d(0, r)
+    down = obj.pos + Vec2d(0, r)
+
+    screen_left_top = backyblacky.pos
+    screen_right_bottom = backyblacky.pos + backyblacky.dims
+
+    # столкновения с рамкой
+    if left.x <= screen_left_top.x:
+        if v.x <= 0:
+            obj.speed = Vec2d(-v.x, v.y)
+    elif right.x >= screen_right_bottom.x:
+        if v.x >= 0:
+            obj.speed = Vec2d(-v.x, v.y)
+
+    if up.y <= screen_left_top.y:
+        if v.y <= 0:
+            obj.speed = Vec2d(v.x, -v.y)
+    elif down.y >= screen_right_bottom.y:
+        if v.y >= 0:
+            obj.speed = Vec2d(v.x, -v.y)
 
 
 def process_game(elapsed):
     """Подвинуть игровые объекты
     """
-    magic_ball.pos += magic_ball.speed * elapsed
-    v = magic_ball.speed
-    r = magic_ball.r
-    left = magic_ball.pos - Vec2d(r, 0)
-    right = magic_ball.pos + Vec2d(r, 0)
-    up = magic_ball.pos - Vec2d(0, r)
-    down = magic_ball.pos + Vec2d(0, r)
-    new_width = width - OFFSET
-    new_height = height - OFFSET
+    # двигаем объекты
+    for ball in balls_list:
+        ball.pos += ball.speed * elapsed
 
-    if left.x <= OFFSET:
-        if v.x <= 0:
-            magic_ball.speed = Vec2d(-v.x, v.y)
-    elif right.x >= new_width:
-        if v.x >= 0:
-            magic_ball.speed = Vec2d(-v.x, v.y)
+    # столкновения объектов со стенкой
+    for ball in balls_list:
+        try_collide_with_border(ball)
 
-    if up.y <= OFFSET:
-        if v.y <= 0:
-            magic_ball.speed = Vec2d(v.x, -v.y)
-    elif down.y >= new_height:
-        if v.y >= 0:
-            magic_ball.speed = Vec2d(v.x, -v.y)
+    # столкновения объектов друг с другом
+    for i1 in range(len(balls_list)):
+        for i2 in range(i1 + 1, len(balls_list)):
+            ball1 = balls_list[i1]
+            ball2 = balls_list[i2]
+            if circles_overlap(ball1, ball2):
+                collide_circles(ball1, ball2)
 
 
 def render():
@@ -78,7 +134,8 @@ def render():
     main_screen.fill(WINDOW_BG_COLOR)
 
     backyblacky.render(screen)
-    magic_ball.render(screen)
+    for ball in balls_list:
+        ball.render(screen)
 
     pygame.display.flip()
 
