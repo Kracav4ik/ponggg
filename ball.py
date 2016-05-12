@@ -19,9 +19,20 @@ class Ball:
         self.pos = Vec2d(x, y)
         self.r = r
         self.speed = Vec2d()
+        self.pos_list = [self.pos]
 
     def render(self, screen):
         """
         :type screen: screen.Screen
         """
         screen.draw_polyline(BALL_COLOR, circle_vertices(self.pos, self.r), True, 2)
+        screen.draw_polyline((255, 255, 255), self.pos_list)
+
+    def set_pos(self, pos):
+        """
+        :type pos: Vec2d
+        """
+        self.pos = pos
+        self.pos_list.append(pos.apply(int))
+        if len(self.pos_list) > 20:
+            self.pos_list = self.pos_list[1:]

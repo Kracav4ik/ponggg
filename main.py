@@ -112,7 +112,7 @@ def process_game(elapsed):
     """
     # двигаем объекты
     for ball in balls_list:
-        ball.pos += ball.speed * elapsed
+        ball.set_pos(ball.pos + ball.speed * elapsed)
 
     # столкновения объектов со стенкой
     for ball in balls_list:
