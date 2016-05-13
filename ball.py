@@ -20,13 +20,14 @@ class Ball:
         self.r = r
         self.speed = Vec2d()
         self.pos_list = [self.pos]
+        self.color = BALL_COLOR
         self.trace_color = (255, 255, 255)
 
     def render(self, screen):
         """
         :type screen: screen.Screen
         """
-        screen.draw_polyline(BALL_COLOR, circle_vertices(self.pos, self.r), True, 2)
+        screen.draw_polyline(self.color, circle_vertices(self.pos, self.r), True, 2)
         screen.draw_polyline(self.trace_color, self.pos_list)
 
     def set_pos(self, pos):

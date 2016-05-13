@@ -6,7 +6,8 @@ import sys
 import time
 
 from background import Blackground
-from ball import Ball
+from ball import Ball, BALL_COLOR
+from poly import Polygon
 from screen import Screen
 from utils import Vec2d, random_vector, dot
 
@@ -24,6 +25,8 @@ BALL_X = width / 2
 BALL_Y = height / 2
 BALL_SPEED = 1350
 GRAVITY = Vec2d(0, 500)
+
+megapoly = Polygon([Vec2d(300, 250), Vec2d(400, 300), Vec2d(350, 450), Vec2d(200, 400), Vec2d(200, 300)])
 
 
 def create_balls():
@@ -113,6 +116,10 @@ def try_collide_with_border(obj):
             obj.speed = Vec2d(v.x, -v.y)
 
 
+def collide_circle_with_poly(ball, poly):
+    return (poly.center() - ball.pos).len() < 100
+
+
 def process_game(elapsed):
     """Подвинуть игровые объекты
     """
@@ -124,6 +131,12 @@ def process_game(elapsed):
     # столкновения объектов со стенкой
     for ball in balls_list:
         try_collide_with_border(ball)
+
+    for ball in balls_list:
+        if collide_circle_with_poly(ball, megapoly):
+            ball.color = (255, 255, 32)
+        else:
+            ball.color = BALL_COLOR
 
     # столкновения объектов друг с другом
     for i1 in range(len(balls_list)):
@@ -165,6 +178,7 @@ def render():
     backyblacky.render(screen)
     for ball in balls_list:
         ball.render(screen)
+    megapoly.render(screen)
 
     frame_time = (time.time() - frame_start)*1000
     screen.draw_text('frame time %.2f ms' % frame_time, screen.get_font('Arial', 14), (64, 255, 64), 10, 10)
