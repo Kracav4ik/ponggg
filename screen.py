@@ -95,19 +95,21 @@ class Screen:
         pygame.draw.lines(poly_surface, color, loop, surface_points, thickness)
         self.surface.blit(poly_surface, (x_min - thickness, y_min - thickness))
 
-    def draw_text(self, text, font, color, pix_x, pix_y, pix_w, pix_h):
+    def draw_text(self, text, font, color, pix_x, pix_y, pix_w=None, pix_h=None):
         """Рисуем текст так, чтобы центр нарисованного текста был в центре заданного прямоугольника
         text - Текст
         font - Шрифт
         color - Цвет, список из 3-х чисел 0..255
         pix_x, pix_y - координаты левого верхнего угла прямоугольника в пикселях
-        pix_w - Ширина прямоугольника в пикселях
-        pix_h - Высота прямоугольника в пикселях
+        pix_w - Ширина прямоугольника в пикселях, если None - текст рисуется без выравнивания по горизонтали
+        pix_h - Высота прямоугольника в пикселях, если None - текст рисуется без выравнивания по вертикали
         """
         text_surface = font.render(text, False, color)
-        text_x = pix_x + pix_w // 2 - text_surface.get_width() // 2
-        text_y = pix_y + pix_h // 2 - text_surface.get_height() // 2
-        self.surface.blit(text_surface, (text_x, text_y))
+        if pix_w is not None:
+            pix_x += pix_w // 2 - text_surface.get_width() // 2
+        if pix_h is not None:
+            pix_y += pix_h // 2 - text_surface.get_height() // 2
+        self.surface.blit(text_surface, (pix_x, pix_y))
 
     def draw_frame(self, color, pix_x, pix_y, pix_w, pix_h, thickness=1):
         """Рисуем прямоугольную рамку

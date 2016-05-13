@@ -3,6 +3,7 @@ import random
 
 import pygame
 import sys
+import time
 
 from background import Blackground
 from ball import Ball
@@ -22,6 +23,7 @@ backyblacky = Blackground(OFFSET, OFFSET, width - 2 * OFFSET, height - 2 * OFFSE
 BALL_X = width / 2
 BALL_Y = height / 2
 BALL_SPEED = 1350
+GRAVITY = Vec2d(0, 500)
 
 
 def create_balls():
@@ -117,6 +119,7 @@ def process_game(elapsed):
     # двигаем объекты
     for ball in balls_list:
         ball.set_pos(ball.pos + ball.speed * elapsed)
+        ball.speed += GRAVITY * elapsed
 
     # столкновения объектов со стенкой
     for ball in balls_list:
@@ -141,6 +144,9 @@ def render():
     for ball in balls_list:
         ball.render(screen)
 
+    frame_time = (time.time() - frame_start)*1000
+    screen.draw_text('frame time %.2f ms' % frame_time, screen.get_font('Arial', 14), (64, 255, 64), 10, 10)
+
     pygame.display.flip()
 
 
@@ -150,6 +156,8 @@ clock.tick()
 # игровой цикл
 while True:
     elapsed = clock.tick(MAX_FPS)
+
+    frame_start = time.time()
 
     handle_input()
     process_game(elapsed / 1000)
