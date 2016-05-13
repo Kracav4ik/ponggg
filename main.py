@@ -134,6 +134,28 @@ def process_game(elapsed):
                 collide_circles(ball1, ball2)
 
 
+def recolor():
+    sorted_balls = sorted(balls_list, key=lambda b: b.speed.len())
+    min_spd = sorted_balls[0].speed.len()
+    med_spd = sorted_balls[len(sorted_balls)//2].speed.len()
+    max_spd = sorted_balls[-1].speed.len()
+    for ball in sorted_balls:
+        ball_spd = ball.speed.len()
+        if ball_spd > med_spd:
+            if med_spd == max_spd:
+                color = (255, 255, 255)
+            else:
+                value = (ball_spd - med_spd) / (max_spd - med_spd)
+                color = (255, 32, int(255 - value*223))
+        else:
+            if med_spd == min_spd:
+                color = (255, 255, 255)
+            else:
+                value = (ball_spd - min_spd) / (med_spd - min_spd)
+                color = (int(value*223 + 32), 32, 255)
+        ball.trace_color = color
+
+
 def render():
     """Отрисовка игры на экране
     """
@@ -161,4 +183,5 @@ while True:
 
     handle_input()
     process_game(elapsed / 1000)
+    recolor()
     render()
