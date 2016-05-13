@@ -64,6 +64,8 @@ def collide_circles(obj1, obj2):
     :type obj1: Ball
     :type obj2: Ball
     """
+    if obj1.pos == obj2.pos:
+        return
     t = (obj1.pos - obj2.pos).norm()
     n = Vec2d(t.y, -t.x)
     u1 = dot(obj1.speed, n)*n + dot(obj2.speed, t)*t
@@ -72,12 +74,14 @@ def collide_circles(obj1, obj2):
     obj2.speed = u2
 
 
-def circles_overlap(obj1, obj2):
+def circles_collide(obj1, obj2):
     """
     :type obj1: Ball
     :type obj2: Ball
     """
-    return (obj1.pos - obj2.pos).len() <= obj2.r + obj1.r
+    if (obj1.pos - obj2.pos).len() > obj2.r + obj1.r:
+        return False
+    return dot(obj1.pos - obj2.pos, obj1.speed - obj2.speed) < 0
 
 
 def try_collide_with_border(obj):
@@ -123,7 +127,7 @@ def process_game(elapsed):
         for i2 in range(i1 + 1, len(balls_list)):
             ball1 = balls_list[i1]
             ball2 = balls_list[i2]
-            if circles_overlap(ball1, ball2):
+            if circles_collide(ball1, ball2):
                 collide_circles(ball1, ball2)
 
 
