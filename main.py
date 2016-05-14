@@ -9,7 +9,7 @@ from background import Blackground
 from ball import Ball, BALL_COLOR
 from poly import Polygon
 from screen import Screen
-from utils import Vec2d, random_vector, dot
+from utils import Vec2d, random_vector, dot, cross
 
 pygame.init()
 
@@ -117,7 +117,27 @@ def try_collide_with_border(obj):
 
 
 def collide_circle_with_poly(ball, poly):
-    return (poly.center() - ball.pos).len() < 100
+    """
+    :type poly: Polygon
+    """
+    for i in range(len(poly.points)):
+        if dist_2_segment(ball.pos, poly.points[i - 1], poly.points[i]) <= ball.r:
+            return True
+    return False
+
+
+def dist_2_segment(x0, x1, x2):
+    """
+    :type x0:Vec2d
+    :type x1:Vec2d
+    :type x2:Vec2d
+    """
+    if dot(x1-x2, x0-x2) <= 0:
+        return (x0 - x2).len()
+    elif dot(x2 - x1, x0 - x1) <= 0:
+        return (x0 - x1).len()
+    else:
+        return abs(cross(x0 - x1, x2 - x1) / (x2 - x1).len())
 
 
 def process_game(elapsed):
