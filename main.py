@@ -64,7 +64,7 @@ def handle_input():
                 print('SPAAAAAAAAAAAAAAAAAAAAACE!!!11')
 
 
-def collide_circles(obj1, obj2):
+def do_collide_circles(obj1, obj2):
     """
     :type obj1: Ball
     :type obj2: Ball
@@ -118,6 +118,7 @@ def try_collide_with_border(obj):
 
 def collide_circle_with_poly(ball, poly):
     """
+    :type ball: Ball
     :type poly: Polygon
     """
     for i in range(len(poly.points)):
@@ -140,6 +141,17 @@ def dist_2_segment(x0, x1, x2):
         return abs(cross(x0 - x1, x2 - x1) / (x2 - x1).len())
 
 
+def point_inside_poly(point, poly):
+    """
+    :type point: Vec2d
+    :type poly: Polygon
+    """
+    for i in range(len(poly.points)):
+        if cross(poly.points[i-1] - poly.points[i], point - poly.points[i]) >= 0:
+            return False
+    return True
+
+
 def process_game(elapsed):
     """Подвинуть игровые объекты
     """
@@ -154,7 +166,9 @@ def process_game(elapsed):
         try_collide_with_border(ball)
 
     for ball in balls_list:
-        if collide_circle_with_poly(ball, megapoly):
+        if point_inside_poly(ball.pos, megapoly):
+            ball.color = (32, 128, 255)
+        elif collide_circle_with_poly(ball, megapoly):
             ball.color = (255, 255, 32)
         else:
             ball.color = BALL_COLOR
@@ -165,7 +179,7 @@ def process_game(elapsed):
             ball1 = balls_list[i1]
             ball2 = balls_list[i2]
             if circles_collide(ball1, ball2):
-                collide_circles(ball1, ball2)
+                do_collide_circles(ball1, ball2)
 
 
 def recolor():
@@ -190,6 +204,11 @@ def recolor():
         ball.trace_color = color
 
 
+Ep0 = 0
+for ball in balls_list:
+    Ep0 -= dot(GRAVITY, ball.pos)
+
+
 def render():
     """Отрисовка игры на экране
     """
@@ -202,7 +221,17 @@ def render():
     megapoly.render(screen)
 
     frame_time = (time.time() - frame_start)*1000
-    screen.draw_text('frame time %.2f ms' % frame_time, screen.get_font('Arial', 14), (64, 255, 64), 10, 10)
+    screen.draw_text('frame time %.2f ms' % frame_time, screen.get_font('Arial', 14), (64, 255, 64), 10, 5)
+
+    Ek = 0
+    for ball in balls_list:
+        Ek += ball.speed.len2()/2
+    screen.draw_text('kinetic energy %.2f' % Ek, screen.get_font('Arial', 14), (64, 255, 64), 10, 25)
+    Ep = -Ep0
+    for ball in balls_list:
+        Ep -= dot(GRAVITY, ball.pos)
+    screen.draw_text('potential energy %.2f' % Ep, screen.get_font('Arial', 14), (64, 255, 64), 10, 45)
+    screen.draw_text('full energy %.2f' % (Ek + Ep), screen.get_font('Arial', 14), (64, 255, 64), 10, 65)
 
     pygame.display.flip()
 
