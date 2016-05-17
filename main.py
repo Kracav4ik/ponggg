@@ -6,8 +6,9 @@ import time
 import pygame
 
 from background import Blackground
-from ball import Ball, BALL_COLOR
-from collision import collide_circle_with_circle, collide_circle_with_border, collide_circle_with_poly, point_inside_poly
+from ball import Ball, BALL_COLOR, circle_vertices
+from collision import collide_circle_with_circle, collide_circle_with_border, collide_circle_with_poly, \
+    point_inside_poly, dist_2_segment
 from poly import Polygon
 from screen import Screen
 from utils import Vec2d, random_vector, dot
@@ -17,6 +18,7 @@ class Cursor:
     def __init__(self):
         self.pos = Vec2d()
         self.visible = False
+        self.radius = 10
 
     def render(self, screen):
         """
@@ -30,6 +32,8 @@ class Cursor:
         draw_point_list_y = [Vec2d(0, y), Vec2d(width, y)]
         screen.draw_polyline(cursor_color, draw_point_list_x)
         screen.draw_polyline(cursor_color, draw_point_list_y)
+        if self.radius > 0:
+            screen.draw_polyline(cursor_color, circle_vertices(self.pos, self.radius, int(self.radius)), True)
 
 
 pygame.init()
@@ -90,6 +94,10 @@ def handle_input():
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # left mouse button
                 cursor.visible = not cursor.visible
+            elif event.button == 4:  # wheel up
+                cursor.radius *= 1.1
+            elif event.button == 5:  # wheel down
+                cursor.radius /= 1.1
 
 
 def process_game(elapsed):
@@ -116,6 +124,11 @@ def process_game(elapsed):
             ball.color = (255, 255, 32)
         else:
             ball.color = BALL_COLOR
+
+    megapoly.clear_colors()
+    for i in range(len(megapoly.points)):
+        if dist_2_segment(cursor.pos, megapoly.points[i - 1], megapoly.points[i]) <= cursor.radius:
+            megapoly.set_color(i, (255, 128, 32))
 
     # столкновения объектов друг с другом
     for i1 in range(len(balls_list)):
