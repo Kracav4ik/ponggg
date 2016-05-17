@@ -1,5 +1,5 @@
 # encoding: utf-8
-from utils import Vec2d, dot, cross
+from utils import Vec2d, dot, cross, component_mul
 
 
 class Manifold:
@@ -10,8 +10,8 @@ class Manifold:
 class CircleCircleManifold(Manifold):
     def __init__(self, circle1, circle2):
         """
-        :type circle1: Ball
-        :type circle2: Ball
+        :type circle1: ball.Ball
+        :type circle2: ball.Ball
         """
         self.circle1 = circle1
         self.circle2 = circle2
@@ -29,10 +29,11 @@ class CircleCircleManifold(Manifold):
         obj2.speed = u2
 
 
-def circles_collide(obj1, obj2):
+def collide_circle_with_circle(obj1, obj2):
     """
-    :type obj1: Ball
-    :type obj2: Ball
+    :type obj1: ball.Ball
+    :type obj2: ball.Ball
+    :rtype: Manifold|None
     """
     if (obj1.pos - obj2.pos).len() > obj2.r + obj1.r:
         return None
@@ -41,7 +42,30 @@ def circles_collide(obj1, obj2):
     return None
 
 
-def try_collide_with_border(obj, border):
+class CircleBorderManifold(Manifold):
+    def __init__(self, circle, hor, vert):
+        """
+        :type circle: ball.Ball
+        :type hor: bool
+        :type vert: bool
+        """
+        self.circle = circle
+        self.hor = hor
+        self.vert = vert
+
+    def collide(self):
+        obj = self.circle
+        x_mul = -1 if self.hor else 1
+        y_mul = -1 if self.vert else 1
+        obj.speed = component_mul(obj.speed, Vec2d(x_mul, y_mul))
+
+
+def collide_circle_with_border(obj, border):
+    """
+    :type obj: ball.Ball
+    :param border: background.Blackground
+    :rtype: Manifold|None
+    """
     v = obj.speed
     r = obj.r
     left = obj.pos - Vec2d(r, 0)
@@ -53,25 +77,31 @@ def try_collide_with_border(obj, border):
     screen_right_bottom = border.pos + border.dims
 
     # столкновения с рамкой
+    hor = False
     if left.x <= screen_left_top.x:
         if v.x <= 0:
-            obj.speed = Vec2d(-v.x, v.y)
+            hor = True
     elif right.x >= screen_right_bottom.x:
         if v.x >= 0:
-            obj.speed = Vec2d(-v.x, v.y)
+            hor = True
 
+    vert = False
     if up.y <= screen_left_top.y:
         if v.y <= 0:
-            obj.speed = Vec2d(v.x, -v.y)
+            vert = True
     elif down.y >= screen_right_bottom.y:
         if v.y >= 0:
-            obj.speed = Vec2d(v.x, -v.y)
+            vert = True
+
+    if hor or vert:
+        return CircleBorderManifold(obj, hor, vert)
+    return None
 
 
 def collide_circle_with_poly(ball, poly):
     """
-    :type ball: Ball
-    :type poly: Polygon
+    :type ball: ball.Ball
+    :type poly: poly.Polygon
     """
     for i in range(len(poly.points)):
         if dist_2_segment(ball.pos, poly.points[i - 1], poly.points[i]) <= ball.r:
@@ -81,9 +111,9 @@ def collide_circle_with_poly(ball, poly):
 
 def dist_2_segment(x0, x1, x2):
     """
-    :type x0:Vec2d
-    :type x1:Vec2d
-    :type x2:Vec2d
+    :type x0: Vec2d
+    :type x1: Vec2d
+    :type x2: Vec2d
     """
     if dot(x1-x2, x0-x2) <= 0:
         return (x0 - x2).len()
@@ -96,7 +126,7 @@ def dist_2_segment(x0, x1, x2):
 def point_inside_poly(point, poly):
     """
     :type point: Vec2d
-    :type poly: Polygon
+    :type poly: poly.Polygon
     """
     for i in range(len(poly.points)):
         if cross(poly.points[i-1] - poly.points[i], point - poly.points[i]) >= 0:

@@ -98,12 +98,20 @@ def apply2(v1, v2, fun2):
     return Vec2d(fun2(v1.x, v2.x), fun2(v1.y, v2.y))
 
 
+def component_mul(v1, v2):
+    """Покомпонентное умножение
+    :type v1: Vec2d
+    :type v2: Vec2d
+    """
+    return apply2(v1, v2, lambda a, b: a*b)
+
+
 def dot(v1, v2):
     """Скалярное произведение
     :type v1: Vec2d
     :type v2: Vec2d
     """
-    return sum(apply2(v1, v2, lambda a, b: a*b))
+    return sum(component_mul(v1, v2))
 
 
 def cross(v1, v2):
