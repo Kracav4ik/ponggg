@@ -100,6 +100,9 @@ def handle_input():
                 cursor.radius /= 1.1
 
 
+debug_lines = []
+
+
 def process_game(elapsed):
     """Подвинуть игровые объекты
     """
@@ -126,9 +129,15 @@ def process_game(elapsed):
             ball.color = BALL_COLOR
 
     megapoly.clear_colors()
+    debug_lines.clear()
     for i in range(len(megapoly.points)):
+        p1 = megapoly.points[i - 2]
+        p2 = megapoly.points[i - 1]
+        p3 = megapoly.points[i]
+        bisect = (p2 - p1).norm() + (p2 - p3).norm()
         if dist_2_segment(cursor.pos, megapoly.points[i - 1], megapoly.points[i]) <= cursor.radius:
             megapoly.set_color(i, (255, 128, 32))
+        debug_lines.append([(255, 32, 32), [p2, p2 + 30*bisect.norm()]])
 
     # столкновения объектов друг с другом
     for i1 in range(len(balls_list)):
@@ -193,6 +202,8 @@ def render():
         Ep -= dot(GRAVITY, ball.pos)
     screen.draw_text('potential energy %.2f' % Ep, screen.get_font('Arial', 14), (64, 255, 64), 10, 45)
     screen.draw_text('full energy %.2f' % (Ek + Ep), screen.get_font('Arial', 14), (64, 255, 64), 10, 65)
+    for color, lines in debug_lines:
+        screen.draw_polyline(color, lines)
 
     cursor.render(screen)
 
