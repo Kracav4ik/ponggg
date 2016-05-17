@@ -98,6 +98,19 @@ def collide_circle_with_border(obj, border):
     return None
 
 
+class CirclePolyManifold(Manifold):
+    def __init__(self, circle, poly):
+        """
+        :type circle: ball.Ball
+        :type poly: poly.Polygon
+        """
+        self.circle = circle
+        self.poly = poly
+
+    def collide(self):
+        pass
+
+
 def collide_circle_with_poly(ball, poly):
     """
     :type ball: ball.Ball
@@ -105,8 +118,8 @@ def collide_circle_with_poly(ball, poly):
     """
     for i in range(len(poly.points)):
         if dist_2_segment(ball.pos, poly.points[i - 1], poly.points[i]) <= ball.r:
-            return True
-    return False
+            return CirclePolyManifold(ball, poly)
+    return None
 
 
 def dist_2_segment(x0, x1, x2):
