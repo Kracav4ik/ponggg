@@ -2,19 +2,31 @@
 from utils import Vec2d, dot, cross
 
 
-def do_collide_circles(obj1, obj2):
-    """
-    :type obj1: Ball
-    :type obj2: Ball
-    """
-    if obj1.pos == obj2.pos:
-        return
-    t = (obj1.pos - obj2.pos).norm()
-    n = Vec2d(t.y, -t.x)
-    u1 = dot(obj1.speed, n)*n + dot(obj2.speed, t)*t
-    u2 = dot(obj2.speed, n)*n + dot(obj1.speed, t)*t
-    obj1.speed = u1
-    obj2.speed = u2
+class Manifold:
+    def collide(self):
+        """меняет скорости у объектов, которые составляют манифолд"""
+
+
+class CircleCircleManifold(Manifold):
+    def __init__(self, circle1, circle2):
+        """
+        :type circle1: Ball
+        :type circle2: Ball
+        """
+        self.circle1 = circle1
+        self.circle2 = circle2
+
+    def collide(self):
+        obj1 = self.circle1
+        obj2 = self.circle2
+        if obj1.pos == obj2.pos:
+            return
+        t = (obj1.pos - obj2.pos).norm()
+        n = Vec2d(t.y, -t.x)
+        u1 = dot(obj1.speed, n) * n + dot(obj2.speed, t) * t
+        u2 = dot(obj2.speed, n) * n + dot(obj1.speed, t) * t
+        obj1.speed = u1
+        obj2.speed = u2
 
 
 def circles_collide(obj1, obj2):
@@ -23,8 +35,10 @@ def circles_collide(obj1, obj2):
     :type obj2: Ball
     """
     if (obj1.pos - obj2.pos).len() > obj2.r + obj1.r:
-        return False
-    return dot(obj1.pos - obj2.pos, obj1.speed - obj2.speed) < 0
+        return None
+    if dot(obj1.pos - obj2.pos, obj1.speed - obj2.speed) < 0:
+        return CircleCircleManifold(obj1, obj2)
+    return None
 
 
 def try_collide_with_border(obj, border):

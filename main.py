@@ -7,8 +7,7 @@ import pygame
 
 from background import Blackground
 from ball import Ball, BALL_COLOR
-from collision import do_collide_circles, circles_collide, try_collide_with_border, collide_circle_with_poly, \
-    point_inside_poly
+from collision import circles_collide, try_collide_with_border, collide_circle_with_poly, point_inside_poly
 from poly import Polygon
 from screen import Screen
 from utils import Vec2d, random_vector, dot
@@ -102,6 +101,8 @@ def process_game(elapsed):
         ball.set_pos(ball.pos + ball.speed * elapsed)
         ball.speed += 0.5 * GRAVITY * elapsed
 
+    collisions_list = []
+
     # столкновения объектов со стенкой
     for ball in balls_list:
         try_collide_with_border(ball, backyblacky)
@@ -119,8 +120,12 @@ def process_game(elapsed):
         for i2 in range(i1 + 1, len(balls_list)):
             ball1 = balls_list[i1]
             ball2 = balls_list[i2]
-            if circles_collide(ball1, ball2):
-                do_collide_circles(ball1, ball2)
+            manifold = circles_collide(ball1, ball2)
+            if manifold:
+                collisions_list.append(manifold)
+
+    for manifold in collisions_list:
+        manifold.collide()
 
 
 def recolor():
