@@ -11,6 +11,26 @@ from poly import Polygon
 from screen import Screen
 from utils import Vec2d, random_vector, dot, cross
 
+
+class Cursor:
+    def __init__(self):
+        self.pos = Vec2d()
+        self.visible = False
+
+    def render(self, screen):
+        """
+        :type screen: screen.Screen
+        """
+        if not self.visible:
+            return
+        cursor_color = (128, 128, 128)
+        x, y = self.pos
+        draw_point_list_x = [Vec2d(x, 0), Vec2d(x, height)]
+        draw_point_list_y = [Vec2d(0, y), Vec2d(width, y)]
+        screen.draw_polyline(cursor_color, draw_point_list_x)
+        screen.draw_polyline(cursor_color, draw_point_list_y)
+
+
 pygame.init()
 
 WINDOW_SIZE = (1280, 720)  # размер окна в пикселах
@@ -27,6 +47,8 @@ BALL_SPEED = 1350
 GRAVITY = Vec2d(0, 500)
 
 megapoly = Polygon([Vec2d(300, 250), Vec2d(400, 300), Vec2d(350, 450), Vec2d(200, 400), Vec2d(200, 300)])
+
+cursor = Cursor()
 
 
 def create_balls():
@@ -62,6 +84,11 @@ def handle_input():
                 global balls_list
                 balls_list = create_balls()
                 print('SPAAAAAAAAAAAAAAAAAAAAACE!!!11')
+        elif event.type == pygame.MOUSEMOTION:
+            cursor.pos = Vec2d(*event.pos)
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:  # left mouse button
+                cursor.visible = not cursor.visible
 
 
 def do_collide_circles(obj1, obj2):
@@ -232,6 +259,8 @@ def render():
         Ep -= dot(GRAVITY, ball.pos)
     screen.draw_text('potential energy %.2f' % Ep, screen.get_font('Arial', 14), (64, 255, 64), 10, 45)
     screen.draw_text('full energy %.2f' % (Ek + Ep), screen.get_font('Arial', 14), (64, 255, 64), 10, 65)
+
+    cursor.render(screen)
 
     pygame.display.flip()
 
