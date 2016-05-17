@@ -115,6 +115,7 @@ def collide_circle_with_poly(ball, poly):
     """
     :type ball: ball.Ball
     :type poly: poly.Polygon
+    :rtype: Manifold|None
     """
     for i in range(len(poly.points)):
         if dist_2_segment(ball.pos, poly.points[i - 1], poly.points[i]) <= ball.r:
@@ -144,4 +145,22 @@ def point_inside_poly(point, poly):
     for i in range(len(poly.points)):
         if cross(poly.points[i-1] - poly.points[i], point - poly.points[i]) >= 0:
             return False
+    return True
+
+
+def sign(integer):
+    if integer < 0:
+        return -1
+    elif integer > 0:
+        return 1
+    else:
+        return 0
+
+
+def line_intersects_segment(line_p1, line_p2, segment_p1, segment_p2):
+    line = line_p2 - line_p1
+    side1 = sign(cross(line, segment_p1))
+    side2 = sign(cross(line, segment_p2))
+    if side1 == side2 == 1 or side1 == side2 == -1:
+        return False
     return True
