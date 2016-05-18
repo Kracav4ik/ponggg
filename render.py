@@ -2,6 +2,7 @@
 import pygame
 
 from screen import Screen
+from utils import Vec2d
 
 
 class RenderManager:
@@ -26,3 +27,26 @@ class RenderManager:
             obj.render(self.screen)
 
         pygame.display.flip()
+
+
+class DebugText:
+    def __init__(self):
+        self.lines = []
+        self.pos = Vec2d(10, 5)
+        self.step = Vec2d(0, 20)
+        self.color = (64, 255, 64)
+        self.font = ('Arial', 14)
+
+    def clear_lines(self):
+        self.lines.clear()
+
+    def add_line(self, line):
+        self.lines.append(line)
+
+    def render(self, screen):
+        font = screen.get_font(*self.font)
+        pos = self.pos
+        for line in self.lines:
+            screen.draw_text(line, font, self.color, *pos)
+            pos += self.step
+        self.clear_lines()
