@@ -161,38 +161,49 @@ for ball in balls_list:
     Ep0 -= dot(GRAVITY, ball.pos)
 
 
-def render():
-    """Отрисовка игры на экране
-    """
-    main_screen = pygame.display.get_surface()
-    main_screen.fill(WINDOW_BG_COLOR)
+class RenderManager:
+    def __init__(self):
+        self.drawables = []
 
-    backyblacky.render(screen)
-    for ball in balls_list:
-        ball.render(screen)
-    megapoly.render(screen)
+    def add_drawables(self, *drawables):
+        self.drawables.extend(drawables)
 
-    frame_time = (time.time() - frame_start)*1000
-    screen.draw_text('frame time %.2f ms' % frame_time, screen.get_font('Arial', 14), (64, 255, 64), 10, 5)
+    def render(self):
+        """Отрисовка игры на экране
+        """
+        main_screen = pygame.display.get_surface()
+        main_screen.fill(WINDOW_BG_COLOR)
 
-    Ek = 0
-    for ball in balls_list:
-        Ek += ball.speed.len2()/2
-    screen.draw_text('kinetic energy %.2f' % Ek, screen.get_font('Arial', 14), (64, 255, 64), 10, 25)
-    Ep = -Ep0
-    for ball in balls_list:
-        Ep -= dot(GRAVITY, ball.pos)
-    screen.draw_text('potential energy %.2f' % Ep, screen.get_font('Arial', 14), (64, 255, 64), 10, 45)
-    screen.draw_text('full energy %.2f' % (Ek + Ep), screen.get_font('Arial', 14), (64, 255, 64), 10, 65)
+        for obj in self.drawables:
+            obj.render(screen)
 
-    cursor.render(screen)
+        frame_time = (time.time() - frame_start)*1000
+        screen.draw_text('frame time %.2f ms' % frame_time, screen.get_font('Arial', 14), (64, 255, 64), 10, 5)
 
-    pygame.display.flip()
+        Ek = 0
+        for ball in balls_list:
+            Ek += ball.speed.len2()/2
+        screen.draw_text('kinetic energy %.2f' % Ek, screen.get_font('Arial', 14), (64, 255, 64), 10, 25)
+        Ep = -Ep0
+        for ball in balls_list:
+            Ep -= dot(GRAVITY, ball.pos)
+        screen.draw_text('potential energy %.2f' % Ep, screen.get_font('Arial', 14), (64, 255, 64), 10, 45)
+        screen.draw_text('full energy %.2f' % (Ek + Ep), screen.get_font('Arial', 14), (64, 255, 64), 10, 65)
+
+        cursor.render(screen)
+
+        pygame.display.flip()
 
 
 MAX_FPS = 50
 clock = pygame.time.Clock()
 clock.tick()
+
+render_manager = RenderManager()
+render_manager.add_drawables(backyblacky)
+render_manager.add_drawables(*balls_list)
+render_manager.add_drawables(megapoly)
+
 # игровой цикл
 while True:
     elapsed = clock.tick(MAX_FPS)
@@ -202,4 +213,4 @@ while True:
     handle_input()
     process_game(elapsed / 1000)
     recolor()
-    render()
+    render_manager.render()
