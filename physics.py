@@ -3,6 +3,7 @@ from background import Blackground
 from ball import Ball
 from collision import collide_circle_with_border, collide_circle_with_poly, collide_circle_with_circle
 from poly import Polygon
+from rectan import Rect
 
 
 class PhysicsEngine:
@@ -15,7 +16,7 @@ class PhysicsEngine:
 
     def process(self, elapsed):
         for body in self.bodies:
-            if isinstance(body, Ball):
+            if isinstance(body, (Ball, Rect)):
                 body.speed += 0.5 * self.gravity * elapsed
                 body.set_pos(body.pos + body.speed * elapsed)
                 body.speed += 0.5 * self.gravity * elapsed

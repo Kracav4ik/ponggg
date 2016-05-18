@@ -9,6 +9,7 @@ from background import Blackground
 from ball import Ball
 from physics import PhysicsEngine
 from poly import Polygon
+from rectan import Rect
 from render import RenderManager, DebugText, DebugCursor
 from utils import Vec2d, random_vector, dot
 
@@ -84,13 +85,12 @@ render_manager = RenderManager(WINDOW_SIZE, WINDOW_BG_COLOR)
 
 width, height = render_manager.get_size()
 backyblacky = Blackground(OFFSET, OFFSET, width - 2 * OFFSET, height - 2 * OFFSET)
-BALL_X = width / 2
-BALL_Y = height / 2
+BALL_POS = Vec2d(width / 2, height / 2)
 BALL_SPEED = 1350
 
 
 def create_balls():
-    magic_ball = Ball(BALL_X, BALL_Y, 50)
+    magic_ball = Ball(BALL_POS, 50)
     magic_ball.speed = BALL_SPEED * random_vector()
 
     result = [magic_ball]
@@ -98,7 +98,7 @@ def create_balls():
         for y in (-1, 0, 1):
             if x == 0 and y == 0:
                 continue
-            result.append(Ball(BALL_X + 150 * x, BALL_Y + 150 * y, random.randint(10, 40)))
+            result.append(Ball(BALL_POS + Vec2d(150 * x, 150 * y), random.randint(10, 40)))
 
     return result
 
@@ -110,6 +110,9 @@ for ball in balls_list:
 
 megapoly = Polygon([Vec2d(300, 250), Vec2d(400, 300), Vec2d(350, 450), Vec2d(200, 400), Vec2d(200, 300)])
 
+RECT_HALF_EXTENTS = Vec2d(20, 15)
+rect_list = [Rect(Vec2d(150 + 2*i*RECT_HALF_EXTENTS.x, 70), RECT_HALF_EXTENTS) for i in range(10)]
+
 MAX_FPS = 50
 clock = pygame.time.Clock()
 clock.tick()
@@ -120,10 +123,12 @@ cursor = DebugCursor()
 
 phys_engine.add_bodies(backyblacky)
 phys_engine.add_bodies(*balls_list)
+phys_engine.add_bodies(*rect_list)
 phys_engine.add_bodies(megapoly)
 
 render_manager.add_drawables(backyblacky)
 render_manager.add_drawables(*balls_list)
+render_manager.add_drawables(*rect_list)
 render_manager.add_drawables(megapoly)
 render_manager.add_drawables(debug_text)
 render_manager.add_drawables(cursor)

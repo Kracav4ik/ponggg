@@ -15,8 +15,8 @@ def circle_vertices(pos, r, n=32):
 
 
 class Ball:
-    def __init__(self, x, y, r):
-        self.pos = Vec2d(x, y)
+    def __init__(self, pos, r):
+        self.pos = pos
         self.r = r
         self.speed = Vec2d()
         self.pos_list = [self.pos, self.pos]
