@@ -35,26 +35,6 @@ class Cursor:
             screen.draw_polyline(cursor_color, circle_vertices(self.pos, self.radius, int(self.radius)), True)
 
 
-pygame.init()
-
-WINDOW_SIZE = (1280, 720)  # размер окна в пикселах
-WINDOW_BG_COLOR = (0, 0, 0)  # цвет окна
-OFFSET = 50
-
-window_surface = pygame.display.set_mode(WINDOW_SIZE)
-screen = Screen(window_surface)
-width, height = screen.get_size()
-backyblacky = Blackground(OFFSET, OFFSET, width - 2 * OFFSET, height - 2 * OFFSET)
-BALL_X = width / 2
-BALL_Y = height / 2
-BALL_SPEED = 1350
-GRAVITY = Vec2d(0, 500)
-
-megapoly = Polygon([Vec2d(300, 250), Vec2d(400, 300), Vec2d(350, 450), Vec2d(200, 400), Vec2d(200, 300)])
-
-cursor = Cursor()
-
-
 def create_balls():
     magic_ball = Ball(BALL_X, BALL_Y, 50)
     magic_ball.speed = BALL_SPEED * random_vector()
@@ -67,9 +47,6 @@ def create_balls():
             result.append(Ball(BALL_X + 150 * x, BALL_Y + 150 * y, random.randint(10, 40)))
 
     return result
-
-
-balls_list = create_balls()
 
 
 def handle_input():
@@ -156,53 +133,89 @@ def recolor():
         ball.trace_color = color
 
 
-Ep0 = 0
-for ball in balls_list:
-    Ep0 -= dot(GRAVITY, ball.pos)
-
-
 class RenderManager:
-    def __init__(self):
+    def __init__(self, size, bg_color):
+        self.bg_color = bg_color
+        self.window_surface = pygame.display.set_mode(size)
+        self.screen = Screen(self.window_surface)
         self.drawables = []
 
     def add_drawables(self, *drawables):
         self.drawables.extend(drawables)
 
+    def get_size(self):
+        return self.screen.get_size()
+
     def render(self):
         """Отрисовка игры на экране
         """
-        main_screen = pygame.display.get_surface()
-        main_screen.fill(WINDOW_BG_COLOR)
+        self.window_surface.fill(self.bg_color)
 
         for obj in self.drawables:
-            obj.render(screen)
-
-        frame_time = (time.time() - frame_start)*1000
-        screen.draw_text('frame time %.2f ms' % frame_time, screen.get_font('Arial', 14), (64, 255, 64), 10, 5)
-
-        Ek = 0
-        for ball in balls_list:
-            Ek += ball.speed.len2()/2
-        screen.draw_text('kinetic energy %.2f' % Ek, screen.get_font('Arial', 14), (64, 255, 64), 10, 25)
-        Ep = -Ep0
-        for ball in balls_list:
-            Ep -= dot(GRAVITY, ball.pos)
-        screen.draw_text('potential energy %.2f' % Ep, screen.get_font('Arial', 14), (64, 255, 64), 10, 45)
-        screen.draw_text('full energy %.2f' % (Ek + Ep), screen.get_font('Arial', 14), (64, 255, 64), 10, 65)
-
-        cursor.render(screen)
+            obj.render(self.screen)
 
         pygame.display.flip()
 
+
+class DebugText:
+    def __init__(self):
+        self.lines = []
+        self.pos = Vec2d(10, 5)
+        self.step = Vec2d(0, 20)
+        self.color = (64, 255, 64)
+        self.font = ('Arial', 14)
+
+    def clear_lines(self):
+        self.lines.clear()
+
+    def add_line(self, line):
+        self.lines.append(line)
+
+    def render(self, screen):
+        font = screen.get_font(*self.font)
+        pos = self.pos
+        for line in self.lines:
+            screen.draw_text(line, font, self.color, *pos)
+            pos += self.step
+        self.clear_lines()
+
+
+pygame.init()
+
+WINDOW_SIZE = (1280, 720)  # размер окна в пикселах
+WINDOW_BG_COLOR = (0, 0, 0)  # цвет окна
+OFFSET = 50
+
+render_manager = RenderManager(WINDOW_SIZE, WINDOW_BG_COLOR)
+
+width, height = render_manager.get_size()
+backyblacky = Blackground(OFFSET, OFFSET, width - 2 * OFFSET, height - 2 * OFFSET)
+BALL_X = width / 2
+BALL_Y = height / 2
+BALL_SPEED = 1350
+GRAVITY = Vec2d(0, 500)
+
+balls_list = create_balls()
+
+Ep0 = 0
+for ball in balls_list:
+    Ep0 -= dot(GRAVITY, ball.pos)
+
+megapoly = Polygon([Vec2d(300, 250), Vec2d(400, 300), Vec2d(350, 450), Vec2d(200, 400), Vec2d(200, 300)])
 
 MAX_FPS = 50
 clock = pygame.time.Clock()
 clock.tick()
 
-render_manager = RenderManager()
+debug_text = DebugText()
+
+cursor = Cursor()
+
 render_manager.add_drawables(backyblacky)
 render_manager.add_drawables(*balls_list)
 render_manager.add_drawables(megapoly)
+render_manager.add_drawables(debug_text)
+render_manager.add_drawables(cursor)
 
 # игровой цикл
 while True:
@@ -214,3 +227,15 @@ while True:
     process_game(elapsed / 1000)
     recolor()
     render_manager.render()
+
+    frame_time = (time.time() - frame_start) * 1000
+    debug_text.add_line('frame time %.2f ms' % frame_time)
+    Ek = 0
+    for ball in balls_list:
+        Ek += ball.speed.len2() / 2
+    debug_text.add_line('kinetic energy %.2f' % Ek)
+    Ep = -Ep0
+    for ball in balls_list:
+        Ep -= dot(GRAVITY, ball.pos)
+    debug_text.add_line('potential energy %.2f' % Ep)
+    debug_text.add_line('full energy %.2f' % (Ek + Ep))
