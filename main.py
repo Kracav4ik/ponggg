@@ -203,7 +203,7 @@ def render():
     screen.draw_text('potential energy %.2f' % Ep, screen.get_font('Arial', 14), (64, 255, 64), 10, 45)
     screen.draw_text('full energy %.2f' % (Ek + Ep), screen.get_font('Arial', 14), (64, 255, 64), 10, 65)
     for color, lines in debug_lines:
-        screen.draw_polyline(color, lines)
+        screen.draw_arrow(color, *lines)
 
     cursor.render(screen)
 

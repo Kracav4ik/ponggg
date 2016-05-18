@@ -1,4 +1,5 @@
 # encoding: utf-8
+from math import pi, sin, cos
 
 import pygame
 
@@ -72,6 +73,7 @@ class Screen:
         points_list - список вершин многоугольника
         thickness - Толщина рамки в пикселях (по умолчанию 1)
         loop - если True, рисует дополнительную линию от конца к началу
+        thickness - толщина линии
         """
         x_min, y_min = points_list[0]
         x_max, y_max = x_min, y_min
@@ -94,6 +96,23 @@ class Screen:
         poly_surface = pygame.Surface((width, height), flags=pygame.SRCALPHA)
         pygame.draw.lines(poly_surface, color, loop, surface_points, thickness)
         self.surface.blit(poly_surface, (x_min - thickness, y_min - thickness))
+
+    def draw_arrow(self, color, begin_point, end_point, angle=pi/6, length=10, thickness=1):
+        """Рисуем стрелочку
+        color - Цвет, список из 3-х или 4-х чисел 0..255 (R, G, B) или (R, G, B, A), A == 0
+        begin_point - начальная точка
+        end_point - конечная точка
+        angle - угол между направлением стрелочки и боковой линией
+        length - длина боковой линии
+        thickness - толщина линии
+        """
+        line = end_point - begin_point
+        mid = end_point - line.norm()*length*cos(angle)
+        delta = line.rot_cw().norm() * length * sin(angle)
+        arrow_sides = [mid - delta, end_point, mid + delta]
+
+        self.draw_polyline(color, [begin_point, end_point], False, thickness)
+        self.draw_polyline(color, arrow_sides, False, thickness)
 
     def draw_text(self, text, font, color, pix_x, pix_y, pix_w=None, pix_h=None):
         """Рисуем текст так, чтобы центр нарисованного текста был в центре заданного прямоугольника

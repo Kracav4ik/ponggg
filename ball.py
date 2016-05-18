@@ -28,6 +28,8 @@ class Ball:
         :type screen: screen.Screen
         """
         screen.draw_polyline(self.color, circle_vertices(self.pos, self.r), True, 2)
+        # for i in range(len(self.pos_list)-1):
+        #     screen.draw_arrow(self.trace_color, self.pos_list[i], self.pos_list[i+1], length=(self.pos_list[i] - self.pos_list[i+1]).len())
         screen.draw_polyline(self.trace_color, self.pos_list)
 
     def set_pos(self, pos):
