@@ -50,3 +50,27 @@ class DebugText:
             screen.draw_text(line, font, self.color, *pos)
             pos += self.step
         self.clear_lines()
+
+
+class DebugCursor:
+    def __init__(self):
+        self.pos = Vec2d()
+        self.visible = False
+        self.radius = 10
+
+    def render(self, screen):
+        """
+        :type screen: screen.Screen
+        """
+        if not self.visible:
+            return
+        cursor_color = (128, 128, 128)
+        x, y = self.pos
+        width, height = screen.get_size()
+        draw_point_list_x = [Vec2d(x, 0), Vec2d(x, height)]
+        draw_point_list_y = [Vec2d(0, y), Vec2d(width, y)]
+        screen.draw_polyline(cursor_color, draw_point_list_x)
+        screen.draw_polyline(cursor_color, draw_point_list_y)
+        if self.radius > 0:
+            from ball import circle_vertices
+            screen.draw_polyline(cursor_color, circle_vertices(self.pos, self.radius, int(self.radius)), True)

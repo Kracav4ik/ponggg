@@ -9,30 +9,8 @@ from background import Blackground
 from ball import Ball, circle_vertices
 from collision import collide_circle_with_circle, collide_circle_with_border, collide_circle_with_poly
 from poly import Polygon
-from render import RenderManager, DebugText
+from render import RenderManager, DebugText, DebugCursor
 from utils import Vec2d, random_vector, dot
-
-
-class Cursor:
-    def __init__(self):
-        self.pos = Vec2d()
-        self.visible = False
-        self.radius = 10
-
-    def render(self, screen):
-        """
-        :type screen: screen.Screen
-        """
-        if not self.visible:
-            return
-        cursor_color = (128, 128, 128)
-        x, y = self.pos
-        draw_point_list_x = [Vec2d(x, 0), Vec2d(x, height)]
-        draw_point_list_y = [Vec2d(0, y), Vec2d(width, y)]
-        screen.draw_polyline(cursor_color, draw_point_list_x)
-        screen.draw_polyline(cursor_color, draw_point_list_y)
-        if self.radius > 0:
-            screen.draw_polyline(cursor_color, circle_vertices(self.pos, self.radius, int(self.radius)), True)
 
 
 def create_balls():
@@ -162,7 +140,7 @@ clock.tick()
 
 debug_text = DebugText()
 
-cursor = Cursor()
+cursor = DebugCursor()
 
 render_manager.add_drawables(backyblacky)
 render_manager.add_drawables(*balls_list)
