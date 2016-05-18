@@ -6,25 +6,11 @@ import time
 import pygame
 
 from background import Blackground
-from ball import Ball, circle_vertices
+from ball import Ball
 from collision import collide_circle_with_circle, collide_circle_with_border, collide_circle_with_poly
 from poly import Polygon
 from render import RenderManager, DebugText, DebugCursor
 from utils import Vec2d, random_vector, dot
-
-
-def create_balls():
-    magic_ball = Ball(BALL_X, BALL_Y, 50)
-    magic_ball.speed = BALL_SPEED * random_vector()
-
-    result = [magic_ball]
-    for x in (-1, 0, 1):
-        for y in (-1, 0, 1):
-            if x == 0 and y == 0:
-                continue
-            result.append(Ball(BALL_X + 150 * x, BALL_Y + 150 * y, random.randint(10, 40)))
-
-    return result
 
 
 def handle_input():
@@ -125,6 +111,20 @@ BALL_X = width / 2
 BALL_Y = height / 2
 BALL_SPEED = 1350
 GRAVITY = Vec2d(0, 500)
+
+
+def create_balls():
+    magic_ball = Ball(BALL_X, BALL_Y, 50)
+    magic_ball.speed = BALL_SPEED * random_vector()
+
+    result = [magic_ball]
+    for x in (-1, 0, 1):
+        for y in (-1, 0, 1):
+            if x == 0 and y == 0:
+                continue
+            result.append(Ball(BALL_X + 150 * x, BALL_Y + 150 * y, random.randint(10, 40)))
+
+    return result
 
 balls_list = create_balls()
 
