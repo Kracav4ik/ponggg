@@ -9,7 +9,7 @@ from background import Blackground
 from ball import Ball, circle_vertices
 from collision import collide_circle_with_circle, collide_circle_with_border, collide_circle_with_poly
 from poly import Polygon
-from screen import Screen
+from render import RenderManager
 from utils import Vec2d, random_vector, dot
 
 
@@ -131,30 +131,6 @@ def recolor():
                 value = (ball_spd - min_spd) / (med_spd - min_spd)
                 color = (int(value*223 + 32), 32, 255)
         ball.trace_color = color
-
-
-class RenderManager:
-    def __init__(self, size, bg_color):
-        self.bg_color = bg_color
-        self.window_surface = pygame.display.set_mode(size)
-        self.screen = Screen(self.window_surface)
-        self.drawables = []
-
-    def add_drawables(self, *drawables):
-        self.drawables.extend(drawables)
-
-    def get_size(self):
-        return self.screen.get_size()
-
-    def render(self):
-        """Отрисовка игры на экране
-        """
-        self.window_surface.fill(self.bg_color)
-
-        for obj in self.drawables:
-            obj.render(self.screen)
-
-        pygame.display.flip()
 
 
 class DebugText:
