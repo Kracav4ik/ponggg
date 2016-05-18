@@ -44,35 +44,50 @@ def process_game(elapsed):
     """Подвинуть игровые объекты
     """
     # двигаем объекты
-    for ball in balls_list:
-        ball.speed += 0.5 * GRAVITY * elapsed
-        ball.set_pos(ball.pos + ball.speed * elapsed)
-        ball.speed += 0.5 * GRAVITY * elapsed
+    phys_engine.process(elapsed)
 
-    collisions_list = []
 
-    # столкновения объектов со стенкой
-    for ball in balls_list:
-        manifold = collide_circle_with_border(ball, backyblacky)
-        if manifold:
-            collisions_list.append(manifold)
+class PhysicsEngine:
+    def __init__(self, gravity):
+        self.gravity = gravity
+        self.bodies = []
 
-    for ball in balls_list:
-        manifold = collide_circle_with_poly(ball, megapoly)
-        if manifold:
-            collisions_list.append(manifold)
+    def add_bodies(self, *bodies):
+        self.bodies.extend(bodies)
 
-    # столкновения объектов друг с другом
-    for i1 in range(len(balls_list)):
-        for i2 in range(i1 + 1, len(balls_list)):
-            ball1 = balls_list[i1]
-            ball2 = balls_list[i2]
-            manifold = collide_circle_with_circle(ball1, ball2)
-            if manifold:
-                collisions_list.append(manifold)
+    def process(self, elapsed):
+        for body in self.bodies:
+            if isinstance(body, Ball):
+                body.speed += 0.5 * self.gravity * elapsed
+                body.set_pos(body.pos + body.speed * elapsed)
+                body.speed += 0.5 * self.gravity * elapsed
 
-    for manifold in collisions_list:
-        manifold.collide()
+        collisions_list = []
+        for i1 in range(len(self.bodies)):
+            for i2 in range(i1 + 1, len(self.bodies)):
+                body1 = self.bodies[i1]
+                body2 = self.bodies[i2]
+                manifold = self.__collide_bodies(body1, body2)
+                if manifold:
+                    collisions_list.append(manifold)
+
+        for manifold in collisions_list:
+            manifold.collide()
+
+    @staticmethod
+    def __collide_bodies(body1, body2):
+        manifold = None
+        if not isinstance(body1, Ball):
+            body1, body2 = body2, body1
+
+        if isinstance(body1, Ball):
+            if isinstance(body2, Blackground):
+                manifold = collide_circle_with_border(body1, body2)
+            elif isinstance(body2, Polygon):
+                manifold = collide_circle_with_poly(body1, body2)
+            elif isinstance(body2, Ball):
+                manifold = collide_circle_with_circle(body1, body2)
+        return manifold
 
 
 def recolor():
@@ -102,6 +117,9 @@ pygame.init()
 WINDOW_SIZE = (1280, 720)  # размер окна в пикселах
 WINDOW_BG_COLOR = (0, 0, 0)  # цвет окна
 OFFSET = 50
+GRAVITY = Vec2d(0, 500)
+
+phys_engine = PhysicsEngine(GRAVITY)
 
 render_manager = RenderManager(WINDOW_SIZE, WINDOW_BG_COLOR)
 
@@ -110,7 +128,6 @@ backyblacky = Blackground(OFFSET, OFFSET, width - 2 * OFFSET, height - 2 * OFFSE
 BALL_X = width / 2
 BALL_Y = height / 2
 BALL_SPEED = 1350
-GRAVITY = Vec2d(0, 500)
 
 
 def create_balls():
@@ -141,6 +158,10 @@ clock.tick()
 debug_text = DebugText()
 
 cursor = DebugCursor()
+
+phys_engine.add_bodies(backyblacky)
+phys_engine.add_bodies(*balls_list)
+phys_engine.add_bodies(megapoly)
 
 render_manager.add_drawables(backyblacky)
 render_manager.add_drawables(*balls_list)
