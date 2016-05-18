@@ -99,16 +99,18 @@ def collide_circle_with_border(obj, border):
 
 
 class CirclePolyManifold(Manifold):
-    def __init__(self, circle, poly):
+    def __init__(self, circle, poly, normal):
         """
         :type circle: ball.Ball
         :type poly: poly.Polygon
+        :type normal: Vec2d
         """
         self.circle = circle
         self.poly = poly
+        self.normal = normal
 
     def collide(self):
-        pass
+        self.circle.speed -= 2 * self.normal * dot(self.circle.speed, self.normal)
 
 
 def collide_circle_with_poly(ball, poly):
@@ -117,10 +119,46 @@ def collide_circle_with_poly(ball, poly):
     :type poly: poly.Polygon
     :rtype: Manifold|None
     """
+    X1, X2, MID = 1, 2, 3
+    to_check = []
     for i in range(len(poly.points)):
-        if dist_2_segment(ball.pos, poly.points[i - 1], poly.points[i]) <= ball.r:
-            return CirclePolyManifold(ball, poly)
-    return None
+        x0 = ball.pos
+        x1 = poly.points[i - 1]
+        x2 = poly.points[i]
+        if dot(x1 - x2, x0 - x2) <= 0:
+            check = X2
+            x = (x0 - x2).len()
+        elif dot(x2 - x1, x0 - x1) <= 0:
+            check = X1
+            x = (x0 - x1).len()
+        else:
+            check = MID
+            x = abs(cross(x0 - x1, x2 - x1) / (x2 - x1).len())
+        if x <= ball.r:
+            to_check.append([x, i, check])
+    if not to_check:
+        return None
+
+    to_check.sort()
+    min_dist, min_i, min_check = to_check[0]
+    if min_check == MID:
+        p1 = poly.points[min_i - 1]
+        p2 = poly.points[min_i]
+        normal = (p2 - p1).norm().rot_cw()
+    else:
+        if min_check == X2:
+            collided_i = min_i
+        else:
+            collided_i = min_i - 1
+        p1 = poly.points[collided_i - 1]
+        p2 = poly.points[collided_i]
+        p3 = poly.points[collided_i + 1 - len(poly.points)]
+        normal = ((p2 - p1).norm() + (p2 - p3).norm()).norm()
+
+    if dot(normal, ball.speed) >= 0:
+        return None
+
+    return CirclePolyManifold(ball, poly, normal)
 
 
 def dist_2_segment(x0, x1, x2):

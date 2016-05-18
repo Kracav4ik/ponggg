@@ -121,12 +121,9 @@ def process_game(elapsed):
             collisions_list.append(manifold)
 
     for ball in balls_list:
-        if point_inside_poly(ball.pos, megapoly):
-            ball.color = (32, 128, 255)
-        elif collide_circle_with_poly(ball, megapoly):
-            ball.color = (255, 255, 32)
-        else:
-            ball.color = BALL_COLOR
+        manifold = collide_circle_with_poly(ball, megapoly)
+        if manifold:
+            collisions_list.append(manifold)
 
     megapoly.clear_colors()
     debug_lines.clear()

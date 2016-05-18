@@ -19,7 +19,7 @@ class Ball:
         self.pos = Vec2d(x, y)
         self.r = r
         self.speed = Vec2d()
-        self.pos_list = [self.pos]
+        self.pos_list = [self.pos, self.pos]
         self.color = BALL_COLOR
         self.trace_color = (255, 255, 255)
 
