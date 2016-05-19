@@ -2,7 +2,7 @@
 import pygame
 
 from screen import Screen
-from utils import Vec2d
+from utils import Vec2d, Color4
 
 
 class RenderManager:
@@ -34,7 +34,7 @@ class DebugText:
         self.lines = []
         self.pos = Vec2d(10, 5)
         self.step = Vec2d(0, 20)
-        self.color = (64, 255, 64)
+        self.color = Color4(64, 255, 64)
         self.font = ('Arial', 14)
 
     def clear_lines(self):
@@ -64,7 +64,7 @@ class DebugCursor:
         """
         if not self.visible:
             return
-        cursor_color = (128, 128, 128)
+        cursor_color = Color4(128, 128, 128)
         x, y = self.pos
         width, height = screen.get_size()
         draw_point_list_x = [Vec2d(x, 0), Vec2d(x, height)]

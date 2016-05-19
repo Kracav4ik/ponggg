@@ -1,5 +1,5 @@
 # encoding: utf-8
-from utils import Vec2d
+from utils import Vec2d, WHITE
 
 
 class Blackground:
@@ -12,6 +12,6 @@ class Blackground:
         :type screen: screen.Screen
         """
         frame_thickness = 2
-        frame_color = (255, 255, 255)
+        frame_color = WHITE
 
         screen.draw_frame(frame_color, self.pos.x, self.pos.y, self.dims.x, self.dims.y, frame_thickness)

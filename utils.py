@@ -24,7 +24,7 @@ class Vec2d:
         return self.data[1]
 
     def __eq__(self, other):
-        return self.x == other.x and self.y == other.y
+        return self.data == other.data
 
     def __ne__(self, other):
         return not (self == other)
@@ -144,3 +144,70 @@ def unit_vector(angle):
 
 def random_vector():
     return unit_vector(random.random() * 2 * math.pi)
+
+
+def clamp(min_value, value, max_value):
+    assert min_value <= max_value, 'min value %s must not be greater than max value %s' % (min_value, max_value)
+    return max(min_value, min(value, max_value))
+
+
+class Color4:
+    def __init__(self, r, g, b, a=255):
+        self.data = tuple(clamp(0, int(v), 255) for v in (r, g, b, a))
+
+    @property
+    def r(self):
+        return self.data[0]
+
+    @property
+    def g(self):
+        return self.data[1]
+
+    @property
+    def b(self):
+        return self.data[2]
+
+    @property
+    def a(self):
+        return self.data[3]
+
+    def __eq__(self, other):
+        return self.data == other.data
+
+    def __ne__(self, other):
+        return not (self == other)
+
+    def __iter__(self):
+        return self.data.__iter__()
+
+    def __len__(self):
+        return self.data.__len__()
+
+    def __getitem__(self, idx):
+        return self.data[idx]
+
+    def __mul__(self, other):
+        assert isinstance(other, numbers.Real), '%r must be a number' % other
+        return self.apply(lambda t: t * other)
+
+    def __rmul__(self, other):
+        return self * other
+
+    def __truediv__(self, other):
+        return self * (1 / other)
+
+    def apply(self, fun):
+        return Color4(*[fun(v) for v in self.data])
+
+    def __str__(self):
+        if self.a == 255:
+            return '(%02X, %02X, %02X)' % self.data[:3]
+        else:
+            return '(%02X, %02X, %02X, %02X)' % self.data
+
+    def __repr__(self):
+        return 'Color4(%s, %s, %s, %s)' % self.data
+
+
+WHITE = Color4(255, 255, 255)
+BLACK = Color4(0, 0, 0)

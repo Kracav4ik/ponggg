@@ -11,7 +11,7 @@ from physics import PhysicsEngine
 from poly import Polygon
 from rectan import Rect
 from render import RenderManager, DebugText, DebugCursor
-from utils import Vec2d, random_vector, dot
+from utils import Vec2d, random_vector, dot, WHITE, Color4, BLACK
 
 
 def handle_input():
@@ -59,23 +59,23 @@ def recolor():
         ball_spd = ball.speed.len()
         if ball_spd > med_spd:
             if med_spd == max_spd:
-                color = (255, 255, 255)
+                color = WHITE
             else:
                 value = (ball_spd - med_spd) / (max_spd - med_spd)
-                color = (255, 32, int(255 - value*223))
+                color = Color4(255, 32, 255 - value*223)
         else:
             if med_spd == min_spd:
-                color = (255, 255, 255)
+                color = WHITE
             else:
                 value = (ball_spd - min_spd) / (med_spd - min_spd)
-                color = (int(value*223 + 32), 32, 255)
+                color = Color4(value*223 + 32, 32, 255)
         ball.trace_color = color
 
 
 pygame.init()
 
 WINDOW_SIZE = (1280, 720)  # размер окна в пикселах
-WINDOW_BG_COLOR = (0, 0, 0)  # цвет окна
+WINDOW_BG_COLOR = BLACK  # цвет окна
 OFFSET = 50
 GRAVITY = Vec2d(0, 500)
 

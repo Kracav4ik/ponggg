@@ -1,8 +1,7 @@
 # encoding: utf-8
-from utils import Vec2d
+from utils import Vec2d, Color4
 
-
-DEFAULT_COLOR = (128, 255, 32)
+DEFAULT_COLOR = Color4(128, 255, 32)
 
 
 class Polygon:

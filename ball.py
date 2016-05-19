@@ -1,9 +1,9 @@
 # encoding: utf-8
 from math import *
 
-from utils import Vec2d, unit_vector
+from utils import Vec2d, unit_vector, WHITE, Color4
 
-BALL_COLOR = (255, 128, 128)
+BALL_COLOR = Color4(255, 128, 128)
 
 
 def circle_vertices(pos, r, n=32):
@@ -21,7 +21,7 @@ class Ball:
         self.speed = Vec2d()
         self.pos_list = [self.pos, self.pos]
         self.color = BALL_COLOR
-        self.trace_color = (255, 255, 255)
+        self.trace_color = WHITE
 
     def render(self, screen):
         """
