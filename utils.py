@@ -208,6 +208,51 @@ class Color4:
     def __repr__(self):
         return 'Color4(%s, %s, %s, %s)' % self.data
 
+    @staticmethod
+    def from_hsv(h, s, v):
+        """
+        :type h: int|float
+        :param h: Hue, 0..360
+        :type s: int|float
+        :param s: Saturation, 0..100
+        :type v: int|float
+        :param v: Value, 0..100
+        """
+        h = clamp(0, h, 360)
+        if h == 360:
+            h = 0
+        s = clamp(0, s, 100)/100
+        v = clamp(0, v, 100)/100
+
+        v_min = (1 - s)*v
+        delta = (v - v_min) * (h % 60) / 60
+        if h < 60:
+            r = v
+            g = v_min + delta
+            b = v_min
+        elif h < 120:
+            r = v - delta
+            g = v
+            b = v_min
+        elif h < 180:
+            r = v_min
+            g = v
+            b = v_min + delta
+        elif h < 240:
+            r = v_min
+            g = v - delta
+            b = v
+        elif h < 300:
+            r = v_min + delta
+            g = v_min
+            b = v
+        else:
+            r = v
+            g = v_min
+            b = v - delta
+
+        return Color4(255*r, 255*g, 255*b)
+
 
 WHITE = Color4(255, 255, 255)
 BLACK = Color4(0, 0, 0)
