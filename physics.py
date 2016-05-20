@@ -1,7 +1,8 @@
 # encoding: utf-8
 from background import Blackground
 from ball import Ball
-from collision import collide_circle_with_border, collide_circle_with_poly, collide_circle_with_circle
+from collision import collide_circle_with_border, collide_circle_with_poly, collide_circle_with_circle, \
+    collide_rect_with_border
 from poly import Polygon
 from rectan import Rect
 
@@ -36,7 +37,7 @@ class PhysicsEngine:
     @staticmethod
     def __collide_bodies(body1, body2):
         manifold = None
-        if not isinstance(body1, Ball):
+        if not isinstance(body1, (Ball, Rect)):
             body1, body2 = body2, body1
 
         if isinstance(body1, Ball):
@@ -46,4 +47,12 @@ class PhysicsEngine:
                 manifold = collide_circle_with_poly(body1, body2)
             elif isinstance(body2, Ball):
                 manifold = collide_circle_with_circle(body1, body2)
+            elif isinstance(body2, Rect):
+                pass
+        elif isinstance(body1, Rect):
+            if isinstance(body2, Blackground):
+                body1.r = body1.half_extents.x
+                manifold = collide_rect_with_border(body1, body2)
+            elif isinstance(body2, Rect):
+                pass
         return manifold

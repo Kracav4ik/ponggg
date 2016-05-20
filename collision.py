@@ -98,6 +98,62 @@ def collide_circle_with_border(obj, border):
     return None
 
 
+class RectBorderManifold(Manifold):
+    def __init__(self, rect, hor, vert):
+        """
+        :type rect: rectan.Rect
+        :type hor: bool
+        :type vert: bool
+        """
+        self.rect = rect
+        self.hor = hor
+        self.vert = vert
+
+    def collide(self):
+        obj = self.rect
+        x_mul = -1 if self.hor else 1
+        y_mul = -1 if self.vert else 1
+        obj.speed = component_mul(obj.speed, Vec2d(x_mul, y_mul))
+
+
+def collide_rect_with_border(obj, border):
+    """
+    :type obj: rectan.Rect
+    :type border: background.Blackground
+    :rtype: Manifold | None
+    """
+    v = obj.speed
+    half_width, half_height = obj.half_extents
+    left = obj.pos - Vec2d(half_width, 0)
+    right = obj.pos + Vec2d(half_width, 0)
+    up = obj.pos - Vec2d(0, half_height)
+    down = obj.pos + Vec2d(0, half_height)
+
+    screen_left_top = border.pos
+    screen_right_bottom = border.pos + border.dims
+
+    # столкновения с рамкой
+    hor = False
+    if left.x <= screen_left_top.x:
+        if v.x <= 0:
+            hor = True
+    elif right.x >= screen_right_bottom.x:
+        if v.x >= 0:
+            hor = True
+
+    vert = False
+    if up.y <= screen_left_top.y:
+        if v.y <= 0:
+            vert = True
+    elif down.y >= screen_right_bottom.y:
+        if v.y >= 0:
+            vert = True
+
+    if hor or vert:
+        return RectBorderManifold(obj, hor, vert)
+    return None
+
+
 class CirclePolyManifold(Manifold):
     def __init__(self, circle, poly, normal):
         """

@@ -6,7 +6,7 @@ class Rect:
     def __init__(self, pos, half_extents, color):
         self.pos = pos
         self.half_extents = half_extents
-        self.speed = Vec2d()
+        self.speed = Vec2d(200, 0)
         self.color = color
 
     def render(self, screen):
