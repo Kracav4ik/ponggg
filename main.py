@@ -111,7 +111,8 @@ for ball in balls_list:
 megapoly = Polygon([Vec2d(300, 250), Vec2d(400, 300), Vec2d(350, 450), Vec2d(200, 400), Vec2d(200, 300)])
 
 RECT_HALF_EXTENTS = Vec2d(10, 150)
-rect_list = [Rect(Vec2d(50 + 2*i*RECT_HALF_EXTENTS.x, 70), RECT_HALF_EXTENTS, Color4.from_hsv(i * 6, 100, 100)) for i in range(60)]
+COUNT = 10
+rect_list = [Rect(Vec2d(50 + 5*i*RECT_HALF_EXTENTS.x, 70), RECT_HALF_EXTENTS, Color4.from_hsv(i * 360 // COUNT, 100, 100)) for i in range(COUNT)]
 
 MAX_FPS = 50
 clock = pygame.time.Clock()

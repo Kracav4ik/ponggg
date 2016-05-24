@@ -2,7 +2,7 @@
 from background import Blackground
 from ball import Ball
 from collision import collide_circle_with_border, collide_circle_with_poly, collide_circle_with_circle, \
-    collide_rect_with_border
+    collide_rect_with_border, collide_rect_with_rect
 from poly import Polygon
 from rectan import Rect
 
@@ -51,8 +51,7 @@ class PhysicsEngine:
                 pass
         elif isinstance(body1, Rect):
             if isinstance(body2, Blackground):
-                body1.r = body1.half_extents.x
                 manifold = collide_rect_with_border(body1, body2)
             elif isinstance(body2, Rect):
-                pass
+                manifold = collide_rect_with_rect(body1, body2)
         return manifold

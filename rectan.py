@@ -4,6 +4,11 @@ from utils import Vec2d
 
 class Rect:
     def __init__(self, pos, half_extents, color):
+        """
+        :param pos: Центр прямоугольнока
+        :param half_extents: Тупл из половины высоты и половины длины
+        :param color: Цвет прямоугольника
+        """
         self.pos = pos
         self.half_extents = half_extents
         self.speed = Vec2d(200, 0)

@@ -217,6 +217,62 @@ def collide_circle_with_poly(ball, poly):
     return CirclePolyManifold(ball, poly, normal)
 
 
+class RectRectManifold(Manifold):
+    def __init__(self, rect1, rect2, hor, vert):
+        """
+        :type rect1: rectan.Rect
+        :type rect2: rectan.Rect
+        :type hor: bool
+        :type vert: bool
+        """
+        self.rect1 = rect1
+        self.rect2 = rect2
+        self.hor = hor
+        self.vert = vert
+
+    def collide(self):
+        obj1 = self.rect1
+        obj2 = self.rect2
+        v1 = obj1.speed
+        v2 = obj2.speed
+
+        if self.vert:
+            obj1.speed = Vec2d(v2.x, v1.y)
+            obj2.speed = Vec2d(v1.x, v2.y)
+        if self.hor:
+            obj1.speed = Vec2d(v1.x, v2.y)
+            obj2.speed = Vec2d(v2.x, v1.y)
+
+
+def collide_rect_with_rect(obj1, obj2):
+    """
+    :type obj1: rectan.Rect
+    :type obj2: rectan.Rect
+    :rtype: Manifold | None
+    """
+    half_width1, half_height1 = obj1.half_extents
+    left1 = obj1.pos - Vec2d(half_width1, 0)
+    right1 = obj1.pos + Vec2d(half_width1, 0)
+    up1 = obj1.pos - Vec2d(0, half_height1)
+    down1 = obj1.pos + Vec2d(0, half_height1)
+
+    half_width2, half_height2 = obj2.half_extents
+    left2 = obj2.pos - Vec2d(half_width2, 0)
+    right2 = obj2.pos + Vec2d(half_width2, 0)
+    up2 = obj2.pos - Vec2d(0, half_height2)
+    down2 = obj2.pos + Vec2d(0, half_height2)
+
+    hor = False
+    vert = False
+    if left1.x - right2.x <= 0 < right1.x - left2.x or left2.x - right1.x <= 0 < right2.x - left1.x:
+        vert = True
+    if up1.y - down2.y <= 0 < up1.y - down2.y or up2.y - down1.y <= 0 < up2.y - down1.y:
+        hor = True
+    if hor or vert:
+        return RectRectManifold(obj1, obj2, hor, vert)
+    return None
+
+
 def dist_2_segment(x0, x1, x2):
     """
     :type x0: Vec2d

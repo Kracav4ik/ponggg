@@ -4,6 +4,10 @@ from utils import Vec2d, WHITE
 
 class Blackground:
     def __init__(self, x, y, width, height):
+        """
+        x, y - Левый верхний угол рамки
+        width, height - Ширина и высота рамки
+        """
         self.pos = Vec2d(x, y)
         self.dims = Vec2d(width, height)
 
