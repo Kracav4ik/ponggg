@@ -233,15 +233,13 @@ class RectRectManifold(Manifold):
     def collide(self):
         obj1 = self.rect1
         obj2 = self.rect2
-        v1 = obj1.speed
-        v2 = obj2.speed
 
+        v1, v2 = obj1.speed, obj2.speed
         if self.vert:
-            obj1.speed = Vec2d(v2.x, v1.y)
-            obj2.speed = Vec2d(v1.x, v2.y)
+            v1, v2 = Vec2d(v2.x, v1.y), Vec2d(v1.x, v2.y)
         if self.hor:
-            obj1.speed = Vec2d(v1.x, v2.y)
-            obj2.speed = Vec2d(v2.x, v1.y)
+            v1, v2 = Vec2d(v1.x, v2.y), Vec2d(v2.x, v1.y)
+        obj1.speed, obj2.speed = v1, v2
 
 
 def collide_rect_with_rect(obj1, obj2):
@@ -262,12 +260,18 @@ def collide_rect_with_rect(obj1, obj2):
     up2 = obj2.pos - Vec2d(0, half_height2)
     down2 = obj2.pos + Vec2d(0, half_height2)
 
-    hor = False
-    vert = False
-    if left1.x - right2.x <= 0 < right1.x - left2.x or left2.x - right1.x <= 0 < right2.x - left1.x:
-        vert = True
-    if up1.y - down2.y <= 0 < up1.y - down2.y or up2.y - down1.y <= 0 < up2.y - down1.y:
-        hor = True
+    intersect_x = False
+    intersect_y = False
+    if left1.x <= right2.x and left2.x <= right1.x or left2.x <= right1.x and left1.x <= right2.x:
+        intersect_x = True
+    if up1.y <= down2.y and up2.y <= down1.y or up2.y <= down1.y and up1.y <= down2.y:
+        intersect_y = True
+    if not intersect_x or not intersect_y:
+        return None
+
+    hor = True
+    vert = True
+
     if hor or vert:
         return RectRectManifold(obj1, obj2, hor, vert)
     return None

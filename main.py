@@ -110,9 +110,33 @@ for ball in balls_list:
 
 megapoly = Polygon([Vec2d(300, 250), Vec2d(400, 300), Vec2d(350, 450), Vec2d(200, 400), Vec2d(200, 300)])
 
-RECT_HALF_EXTENTS = Vec2d(10, 150)
-COUNT = 10
-rect_list = [Rect(Vec2d(50 + 5*i*RECT_HALF_EXTENTS.x, 70), RECT_HALF_EXTENTS, Color4.from_hsv(i * 360 // COUNT, 100, 100)) for i in range(COUNT)]
+
+def create_rects(x_count, y_count):
+    result = []
+    w, h = backyblacky.dims
+
+    step_x = w // x_count
+    step_y = h // y_count
+
+    half_rect_w = step_x // 4
+    half_rect_h = step_y // 4
+    half_extents = Vec2d(half_rect_w, half_rect_h)
+    offset = backyblacky.pos + half_extents
+    for x_idx in range(x_count):
+        for y_idx in range(y_count):
+            x = half_rect_w + x_idx*step_x
+            y = half_rect_h + y_idx*step_y
+            hue = 360*x_idx//(x_count - 1)
+            saturation = 30 + 70*y_idx//(y_count - 1)
+            rect = Rect(offset + Vec2d(x, y), half_extents, Color4.from_hsv(hue, saturation, 100))
+            idx = x_idx + y_idx
+            max_idx = x_count + y_count - 2
+            rect.speed = Vec2d(100 + 300*idx/max_idx, -150 + 370*idx/max_idx)
+            result.append(rect)
+    return result
+
+
+rect_list = create_rects(4, 4)
 
 MAX_FPS = 50
 clock = pygame.time.Clock()
@@ -141,7 +165,7 @@ while True:
     frame_start = time.time()
 
     handle_input()
-    process_game(elapsed / 1000)
+    process_game(0.3*elapsed / 1000)
     render_manager.render()
 
     frame_time = (time.time() - frame_start) * 1000
