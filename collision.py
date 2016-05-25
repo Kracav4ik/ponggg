@@ -1,5 +1,58 @@
 # encoding: utf-8
-from utils import Vec2d, dot, cross, component_mul
+from utils import Vec2d, dot, cross, component_mul, max_coords, min_coords
+
+
+class AABB:
+    def __init__(self, *points):
+        self.bbl = None
+        ":type: Vec2d|None"
+        self.fur = None
+        ":type: Vec2d|None"
+
+        for point in points:
+            self.add(point)
+
+    def __bool__(self):
+        return self.bbl is not None
+
+    def add(self, point):
+        """
+        :type point: Vec2d|None
+        """
+        if point is None:
+            return
+        if not self:
+            self.bbl = self.fur = point
+            return
+        self.bbl = min_coords(self.bbl, point)
+        self.fur = max_coords(self.fur, point)
+
+    def is_inside(self, point):
+        """
+        :type point: Vec2d
+        """
+        if not self:
+            return False
+        return self.bbl.x <= point.x <= self.fur.x and self.bbl.y <= point.y <= self.fur.y
+
+    def union(self, aabb):
+        """
+        :type aabb: AABB
+        """
+        return AABB(self.bbl, self.fur, aabb.bbl, aabb.fur)
+
+    def intersection(self, aabb):
+        """
+        :type aabb: AABB
+        """
+        result = AABB()
+        if self and aabb:
+            new_bbl = max_coords(self.bbl, aabb.bbl)
+            new_fur = min_coords(self.fur, aabb.fur)
+            if new_bbl.x <= new_fur.x and new_bbl.y <= new_fur.y:
+                result.add(new_bbl)
+                result.add(new_fur)
+        return result
 
 
 class Manifold:
