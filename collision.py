@@ -301,23 +301,25 @@ def collide_rect_with_rect(obj1, obj2):
     :type obj2: rectan.Rect
     :rtype: Manifold | None
     """
-    half_width1, half_height1 = obj1.half_extents
-    left1 = obj1.pos - Vec2d(half_width1, 0)
-    right1 = obj1.pos + Vec2d(half_width1, 0)
-    up1 = obj1.pos - Vec2d(0, half_height1)
-    down1 = obj1.pos + Vec2d(0, half_height1)
+    half_width1, half_height1 = obj1.half_extents.data
+    x1, y1 = obj1.pos.data
+    left1 = x1 - half_width1
+    right1 = x1 + half_width1
+    up1 = y1 - half_height1
+    down1 = y1 + half_height1
 
-    half_width2, half_height2 = obj2.half_extents
-    left2 = obj2.pos - Vec2d(half_width2, 0)
-    right2 = obj2.pos + Vec2d(half_width2, 0)
-    up2 = obj2.pos - Vec2d(0, half_height2)
-    down2 = obj2.pos + Vec2d(0, half_height2)
+    half_width2, half_height2 = obj2.half_extents.data
+    x2, y2 = obj2.pos.data
+    left2 = x2 - half_width2
+    right2 = x2 + half_width2
+    up2 = y2 - half_height2
+    down2 = y2 + half_height2
 
     intersect_x = False
     intersect_y = False
-    if left1.x <= right2.x and left2.x <= right1.x or left2.x <= right1.x and left1.x <= right2.x:
+    if left1 <= right2 and left2 <= right1 or left2 <= right1 and left1 <= right2:
         intersect_x = True
-    if up1.y <= down2.y and up2.y <= down1.y or up2.y <= down1.y and up1.y <= down2.y:
+    if up1 <= down2 and up2 <= down1 or up2 <= down1 and up1 <= down2:
         intersect_y = True
     if not intersect_x or not intersect_y:
         return None

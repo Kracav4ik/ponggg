@@ -136,7 +136,7 @@ def create_rects(x_count, y_count):
     return result
 
 
-rect_list = create_rects(4, 4)
+rect_list = create_rects(10, 5)
 
 MAX_FPS = 50
 clock = pygame.time.Clock()

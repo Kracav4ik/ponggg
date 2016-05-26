@@ -45,20 +45,19 @@ class Vec2d:
         return self.apply(lambda t: -t)
 
     def __add__(self, other):
-        return apply2(self, other, lambda a, b: a+b)
+        return Vec2d(self.data[0] + other.data[0], self.data[1] + other.data[1])
 
     def __sub__(self, other):
-        return self + (-other)
+        return Vec2d(self.data[0] - other.data[0], self.data[1] - other.data[1])
 
     def __mul__(self, other):
-        assert isinstance(other, numbers.Real), '%r must be a number' % other
-        return self.apply(lambda t: t*other)
+        return Vec2d(self.data[0] * other, self.data[1] * other)
 
     def __rmul__(self, other):
-        return self * other
+        return Vec2d(self.data[0] * other, self.data[1] * other)
 
     def __truediv__(self, other):
-        return self * (1/other)
+        return Vec2d(self.data[0] / other, self.data[1] / other)
 
     def __abs__(self):
         return self.apply(abs)
@@ -187,14 +186,13 @@ class Color4:
         return self.data[idx]
 
     def __mul__(self, other):
-        assert isinstance(other, numbers.Real), '%r must be a number' % other
-        return self.apply(lambda t: t * other)
+        return Color4(self.data[0] * other, self.data[1] * other, self.data[2] * other, self.data[3] * other)
 
     def __rmul__(self, other):
-        return self * other
+        return Color4(self.data[0] * other, self.data[1] * other, self.data[2] * other, self.data[3] * other)
 
     def __truediv__(self, other):
-        return self * (1 / other)
+        return Color4(self.data[0] / other, self.data[1] / other, self.data[2] / other, self.data[3] / other)
 
     def apply(self, fun):
         return Color4(*[fun(v) for v in self.data])

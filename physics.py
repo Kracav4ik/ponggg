@@ -37,21 +37,21 @@ class PhysicsEngine:
     @staticmethod
     def __collide_bodies(body1, body2):
         manifold = None
-        if not isinstance(body1, (Ball, Rect)):
+        if body1.__class__ != Ball and body1.__class__ != Rect:
             body1, body2 = body2, body1
 
-        if isinstance(body1, Ball):
-            if isinstance(body2, Blackground):
+        if body1.__class__ == Ball:
+            if body2.__class__ == Blackground:
                 manifold = collide_circle_with_border(body1, body2)
-            elif isinstance(body2, Polygon):
+            elif body2.__class__ == Polygon:
                 manifold = collide_circle_with_poly(body1, body2)
-            elif isinstance(body2, Ball):
+            elif body2.__class__ == Ball:
                 manifold = collide_circle_with_circle(body1, body2)
-            elif isinstance(body2, Rect):
+            elif body2.__class__ == Rect:
                 pass
-        elif isinstance(body1, Rect):
-            if isinstance(body2, Blackground):
+        elif body1.__class__ == Rect:
+            if body2.__class__ == Blackground:
                 manifold = collide_rect_with_border(body1, body2)
-            elif isinstance(body2, Rect):
+            elif body2.__class__ == Rect:
                 manifold = collide_rect_with_rect(body1, body2)
         return manifold
