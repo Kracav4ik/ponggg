@@ -22,6 +22,50 @@ class Tree:
             return
         checker(value, self.root)
 
+    @staticmethod
+    def rotate_left(node):
+        """Делает левый поворот
+        """
+        new_node = Node(node.value)
+        node.value = node.right.value
+        left_subtree = node.left
+        central_subtree = node.right.left
+        node.right = node.right.right
+        node.left = new_node
+        new_node.right = central_subtree
+        new_node.left = left_subtree
+
+    @staticmethod
+    def rotate_right(node):
+        """Делает правый поворот
+        """
+        new_node = Node(node.value)
+        node.value = node.left.value
+        right_subtree = node.right
+        central_subtree = node.left.right
+        node.left = node.left.left
+        node.right = new_node
+        new_node.left = central_subtree
+        new_node.right = right_subtree
+
+    @staticmethod
+    def min_node(node):
+        """Ищет ноду с минимальным значением
+        :type node: Node
+        """
+        while node.left is not None:
+            node = node.left
+        return node
+
+    @staticmethod
+    def max_node(node):
+        """Ищет ноду с максимальным значением
+        :type node: Node
+        """
+        while node.right is not None:
+            node = node.right
+        return node
+
 
 def checker(value, root):
     if root.value == value:
@@ -52,4 +96,9 @@ tree.add(3)
 tree.add(4.5)
 tree.add(4.6)
 tree.add(4.7)
+print(tree)
+tree.rotate_left(tree.root)
+tree.rotate_right(tree.root)
+print(tree.min_node(tree.root))
+print(tree.max_node(tree.root))
 print(tree)
