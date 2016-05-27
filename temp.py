@@ -4,7 +4,7 @@ import pygame
 import sys
 
 from render import RenderManager, DebugText
-from utils import BLACK, WHITE
+from utils import BLACK, WHITE, Vec2d
 
 
 class Node:
@@ -89,7 +89,9 @@ class Tree:
         """
         :type screen: screen.Screen
         """
-        draw_tree(self.root, screen)
+        w, h = screen.get_size()
+        draw_subtree(self.root, 0, 0, w, h, Tree.height(self.root), screen)
+
 
 def checker(value, root):
     if root.value == value:
@@ -151,26 +153,24 @@ def global2local(x, y, w, h):
     return x, y, w, h
 
 
-def draw_tree(node, screen):
+def draw_subtree(node, x, y, w, h, l, screen):
     """Рисует дерево
     :type screen: screen.Screen
     :type node: Node
     """
-    height = Tree.height(node)
-    w, h = screen.get_size()
-    x, y = 0, 0
-    m = 1
-    tree_list = []
-    for level in range(height):
-        for _ in range(2**level):
-            tree_list.append(global2local(x, y, w, h / height))
-            x += w
-        w /= 2
-        m *= 2
-        x = 0
-        y += h / height
-    for tr in tree_list:
-        screen.draw_frame(WHITE, *tr)
+    if node is None:
+        return
+    level_h = h / l
+    draw_subtree(node.left, x, y + level_h, w / 2, h - level_h, l - 1, screen)
+    draw_subtree(node.right, x + w / 2, y + level_h, w / 2, h - level_h, l - 1, screen)
+    rect = global2local(x, y, w, level_h)
+    screen.draw_frame(WHITE, *rect)
+    screen.draw_text(str(node.value), screen.get_font('Arial', 20), WHITE, *rect)
+    x, y, w, h = rect
+    if node.left is not None:
+        screen.draw_arrow(WHITE, Vec2d(x + w / 4, y + h), Vec2d(x, y + 2*h))
+    if node.right is not None:
+        screen.draw_arrow(WHITE, Vec2d(x + 3 * w / 4, y + h), Vec2d(x + w, y + 2 * h))
 
 
 def handle_input():
