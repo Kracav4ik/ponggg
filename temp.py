@@ -66,6 +66,19 @@ class Tree:
             node = node.right
         return node
 
+    @staticmethod
+    def height(node):
+        """
+        Ищет максимальную высоту дерева
+        :type node: Node
+        """
+        if node is None:
+            return 0
+        return max(Tree.height(node.left), Tree.height(node.right)) + 1
+
+    def __str__(self):
+        return 'Tree of height %s' % Tree.height(self.root)
+
 
 def checker(value, root):
     if root.value == value:
