@@ -1,4 +1,10 @@
 # encoding: utf-8
+import time
+import pygame
+import sys
+
+from render import RenderManager, DebugText
+from utils import BLACK, WHITE
 
 
 class Node:
@@ -79,6 +85,12 @@ class Tree:
     def __str__(self):
         return 'Tree of height %s' % Tree.height(self.root)
 
+    def render(self, screen):
+        """
+        :type screen: screen.Screen
+        """
+        screen.draw_text('I AM A TREE', screen.get_font('Arial', 20), WHITE, 0, 0, *screen.get_size())
+
 
 def checker(value, root):
     if root.value == value:
@@ -98,6 +110,7 @@ def checker(value, root):
 
 
 tree = Tree()
+'''
 print(tree)
 tree.add(5)
 print(tree)
@@ -115,3 +128,52 @@ tree.rotate_right(tree.root)
 print(tree.min_node(tree.root))
 print(tree.max_node(tree.root))
 print(tree)
+'''
+
+
+def handle_input():
+    """Обработка input от игрока
+    """
+    events = pygame.event.get()
+    for event in events:
+        if event.type == pygame.QUIT:
+            sys.exit()
+        elif event.type == pygame.KEYDOWN:
+            # клавиатура
+            print('event', event)
+            if event.key == pygame.K_ESCAPE:
+                sys.exit()
+
+
+def process_game(elapsed):
+    pass
+
+
+pygame.init()
+
+WINDOW_SIZE = (1280, 720)  # размер окна в пикселах
+WINDOW_BG_COLOR = BLACK  # цвет окна
+
+render_manager = RenderManager(WINDOW_SIZE, WINDOW_BG_COLOR)
+
+MAX_FPS = 50
+clock = pygame.time.Clock()
+clock.tick()
+
+debug_text = DebugText()
+
+render_manager.add_drawables(tree)
+render_manager.add_drawables(debug_text)
+
+# игровой цикл
+while True:
+    elapsed = clock.tick(MAX_FPS)
+
+    frame_start = time.time()
+
+    handle_input()
+    process_game(elapsed / 1000)
+    render_manager.render()
+
+    frame_time = (time.time() - frame_start) * 1000
+    debug_text.add_line('frame time %.2f ms' % frame_time)
