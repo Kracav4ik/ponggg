@@ -110,39 +110,38 @@ def checker(value, root):
         return
 
 
+class GeneratorStepper:
+    def __init__(self, generator_func):
+        self.generator = generator_func()
+
+    def step(self):
+        if not self.generator:
+            return False
+        try:
+            self.generator.send(None)
+            return True
+        except StopIteration:
+            self.generator = None
+            return False
+
+
 tree = Tree()
 
-tree.add(5)
 
-tree.add(3)
-tree.add(7)
+def tree_progress():
+    yield tree.add(5)
+    yield tree.add(2)
+    yield tree.add(7)
+    yield tree.add(3)
+    yield tree.add(4.5)
+    yield tree.add(4.6)
+    yield tree.add(4.7)
+    yield tree.rotate_left(tree.root.left)
+    yield tree.rotate_left(tree.root.left)
+    yield tree.rotate_right(tree.root)
+    yield exit()
 
-tree.add(2)
-tree.add(4)
-tree.add(6)
-tree.add(8)
-
-tree.add(9)
-tree.add(10)
-tree.add(11)
-
-# print(tree)
-# tree.add(5)
-# print(tree)
-# tree.add(2)
-# print(tree)
-# tree.add(7)
-# print(tree)
-# tree.add(3)
-# tree.add(4.5)
-# tree.add(4.6)
-# tree.add(4.7)
-# print(tree)
-# tree.rotate_left(tree.root)
-# tree.rotate_right(tree.root)
-# print(tree.min_node(tree.root))
-# print(tree.max_node(tree.root))
-# print(tree)
+stepper = GeneratorStepper(tree_progress)
 
 
 def global2local(x, y, w, h):
@@ -185,6 +184,8 @@ def handle_input():
             print('event', event)
             if event.key == pygame.K_ESCAPE:
                 sys.exit()
+            elif event.key == pygame.K_SPACE:
+                stepper.step()
 
 
 def process_game(elapsed):
