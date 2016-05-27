@@ -89,8 +89,7 @@ class Tree:
         """
         :type screen: screen.Screen
         """
-        screen.draw_text('I AM A TREE', screen.get_font('Arial', 20), WHITE, 0, 0, *screen.get_size())
-
+        draw_tree(self.root, screen)
 
 def checker(value, root):
     if root.value == value:
@@ -110,25 +109,68 @@ def checker(value, root):
 
 
 tree = Tree()
-'''
-print(tree)
+
 tree.add(5)
-print(tree)
-tree.add(2)
-print(tree)
-tree.add(7)
-print(tree)
+
 tree.add(3)
-tree.add(4.5)
-tree.add(4.6)
-tree.add(4.7)
-print(tree)
-tree.rotate_left(tree.root)
-tree.rotate_right(tree.root)
-print(tree.min_node(tree.root))
-print(tree.max_node(tree.root))
-print(tree)
-'''
+tree.add(7)
+
+tree.add(2)
+tree.add(4)
+tree.add(6)
+tree.add(8)
+
+tree.add(9)
+tree.add(10)
+tree.add(11)
+
+# print(tree)
+# tree.add(5)
+# print(tree)
+# tree.add(2)
+# print(tree)
+# tree.add(7)
+# print(tree)
+# tree.add(3)
+# tree.add(4.5)
+# tree.add(4.6)
+# tree.add(4.7)
+# print(tree)
+# tree.rotate_left(tree.root)
+# tree.rotate_right(tree.root)
+# print(tree.min_node(tree.root))
+# print(tree.max_node(tree.root))
+# print(tree)
+
+
+def global2local(x, y, w, h):
+    x += PADDING * w
+    y += PADDING * h
+    h /= 2
+    w /= 2
+    return x, y, w, h
+
+
+def draw_tree(node, screen):
+    """Рисует дерево
+    :type screen: screen.Screen
+    :type node: Node
+    """
+    height = Tree.height(node)
+    w, h = screen.get_size()
+    x, y = 0, 0
+    m = 1
+    tree_list = []
+    for level in range(height):
+        for _ in range(2**level):
+            tree_list.append(global2local(x, y, w, h / height))
+            x += w
+        w /= 2
+        m *= 2
+        x = 0
+        y += h / height
+    for tr in tree_list:
+        screen.draw_frame(WHITE, *tr)
 
 
 def handle_input():
@@ -155,6 +197,8 @@ WINDOW_SIZE = (1280, 720)  # размер окна в пикселах
 WINDOW_BG_COLOR = BLACK  # цвет окна
 
 render_manager = RenderManager(WINDOW_SIZE, WINDOW_BG_COLOR)
+
+PADDING = 1/4
 
 MAX_FPS = 50
 clock = pygame.time.Clock()
