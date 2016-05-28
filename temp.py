@@ -11,7 +11,21 @@ class Node:
     def __init__(self, value):
         self.value = value
         self.left = None
+        ":type : Node"
         self.right = None
+        ":type : Node"
+        self.parent = None
+        ":type : Node"
+
+    def set_right(self, node):
+        self.right = node
+        if node:
+            node.parent = self
+
+    def set_left(self, node):
+        self.left = node
+        if node:
+            node.parent = self
 
     def __str__(self):
         return "[%s]" % self.value
@@ -21,12 +35,62 @@ class Tree:
     def __init__(self):
         self.root = None
 
+    def set_root(self, node):
+        self.root = node
+        if node:
+            node.parent = None
+
     def add(self, value):
         """Добавляет элементы в дерево"""
         if self.root is None:
-            self.root = Node(value)
+            self.set_root(Node(value))
             return
-        checker(value, self.root)
+        add_in_tree(value, self.root)
+
+    @staticmethod
+    def find_node(value, root):
+        """
+        :type value: float
+        :type root: Node
+        :return Node
+        """
+        if root is None:
+            return None
+        if value == root.value:
+            return root
+        elif value > root.value:
+            return Tree.find_node(value, root.right)
+        else:
+            return Tree.find_node(value, root.left)
+
+    def delete(self, value):
+        node = self.find_node(value, self.root)
+        ":type node: Node"
+        if node is None:
+            return
+
+        if node.parent is None:
+            # удаляем корень дерева
+            set_node_func = self.set_root
+        elif node is node.parent.left:
+            # удаляемая вершина - левый ребенок
+            set_node_func = node.parent.set_left
+        else:
+            # удаляемая вершина - правый ребенок
+            set_node_func = node.parent.set_right
+
+        if node.left is None:
+            if node.right is None:
+                set_node_func(None)
+            else:
+                set_node_func(node.right)
+        else:
+            if node.right is None:
+                set_node_func(node.left)
+            else:
+                new_node_value = Tree.min_node(node.right).value
+                self.delete(new_node_value)
+                node.value = new_node_value
 
     @staticmethod
     def rotate_left(node):
@@ -34,12 +98,16 @@ class Tree:
         """
         new_node = Node(node.value)
         node.value = node.right.value
+
         left_subtree = node.left
         central_subtree = node.right.left
-        node.right = node.right.right
-        node.left = new_node
-        new_node.right = central_subtree
-        new_node.left = left_subtree
+        right_subtree = node.right.right
+
+        node.set_right(right_subtree)
+        node.set_left(new_node)
+
+        new_node.set_right(central_subtree)
+        new_node.set_left(left_subtree)
 
     @staticmethod
     def rotate_right(node):
@@ -47,19 +115,23 @@ class Tree:
         """
         new_node = Node(node.value)
         node.value = node.left.value
-        right_subtree = node.right
+
+        left_subtree = node.left.left
         central_subtree = node.left.right
-        node.left = node.left.left
-        node.right = new_node
-        new_node.left = central_subtree
-        new_node.right = right_subtree
+        right_subtree = node.right
+
+        node.set_left(left_subtree)
+        node.set_right(new_node)
+
+        new_node.set_left(central_subtree)
+        new_node.set_right(right_subtree)
 
     @staticmethod
     def min_node(node):
         """Ищет ноду с минимальным значением
         :type node: Node
         """
-        while node.left is not None:
+        while node.left:
             node = node.left
         return node
 
@@ -68,7 +140,7 @@ class Tree:
         """Ищет ноду с максимальным значением
         :type node: Node
         """
-        while node.right is not None:
+        while node.right:
             node = node.right
         return node
 
@@ -93,20 +165,23 @@ class Tree:
         draw_subtree(self.root, 0, 0, w, h, Tree.height(self.root), screen)
 
 
-def checker(value, root):
+def add_in_tree(value, root):
+    """
+    :type root: Node
+    """
     if root.value == value:
         return
     elif root.value < value:
         if root.right is None:
-            root.right = Node(value)
+            root.set_right(Node(value))
         elif root.right:
-            checker(value, root.right)
+            add_in_tree(value, root.right)
         return
     elif value < root.value:
         if root.left is None:
-            root.left = Node(value)
+            root.set_left(Node(value))
         elif root.left:
-            checker(value, root.left)
+            add_in_tree(value, root.left)
         return
 
 
@@ -129,16 +204,27 @@ tree = Tree()
 
 
 def tree_progress():
-    yield tree.add(5)
+    yield tree.add(1)
+    yield tree.delete(1)
+    yield tree.add(1)
+    yield tree.add(0)
+    yield tree.delete(0)
     yield tree.add(2)
-    yield tree.add(7)
+    yield tree.add(1.5)
+    yield tree.delete(1)
     yield tree.add(3)
-    yield tree.add(4.5)
-    yield tree.add(4.6)
-    yield tree.add(4.7)
-    yield tree.rotate_left(tree.root.left)
-    yield tree.rotate_left(tree.root.left)
-    yield tree.rotate_right(tree.root)
+    yield tree.add(1)
+    yield tree.add(1.2)
+    yield tree.add(2.3)
+    yield tree.add(2.2)
+    yield tree.add(2.1)
+    yield tree.add(4)
+    yield tree.delete(3)
+    yield tree.add(4)
+    yield tree.add(5)
+    yield tree.add(6)
+    yield tree.add(7)
+    yield tree.delete(2)
     yield exit()
 
 stepper = GeneratorStepper(tree_progress)
