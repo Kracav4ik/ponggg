@@ -7,6 +7,11 @@ from render import RenderManager, DebugText
 from utils import BLACK, WHITE, Vec2d
 
 
+#
+# ==========================================================================
+#
+
+
 class Node:
     def __init__(self, value):
         self.value = value
@@ -45,7 +50,7 @@ class Tree:
         if self.root is None:
             self.set_root(Node(value))
             return
-        add_in_tree(value, self.root)
+        self.add_in_tree(value, self.root)
 
     @staticmethod
     def find_node(value, root):
@@ -62,6 +67,26 @@ class Tree:
             return Tree.find_node(value, root.right)
         else:
             return Tree.find_node(value, root.left)
+
+    @staticmethod
+    def add_in_tree(value, node):
+        """
+        :type node: AVLNode
+        """
+        if node.value == value:
+            return
+        elif node.value < value:
+            if node.right is None:
+                node.set_right(AVLNode(value))
+            elif node.right:
+                Tree.add_in_tree(value, node.right)
+            return
+        elif value < node.value:
+            if node.left is None:
+                node.set_left(AVLNode(value))
+            elif node.left:
+                Tree.add_in_tree(value, node.left)
+            return
 
     def delete(self, value):
         node = self.find_node(value, self.root)
@@ -165,24 +190,163 @@ class Tree:
         draw_subtree(self.root, 0, 0, w, h, Tree.height(self.root), screen)
 
 
-def add_in_tree(value, root):
+#
+# ==========================================================================
+#
+
+
+class AVLNode:
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        ":type : AVLNode"
+        self.right = None
+        ":type : AVLNode"
+        self.parent = None
+        ":type : AVLNode"
+        self.height = 0
+
+    @staticmethod
+    def get_height(node):
+        """
+        :type node: AVLNode
+        """
+        if node is None:
+            return -1
+        return node.height
+
+    def recalc_height(self):
+        left_height = self.get_height(self.left)
+        right_height = self.get_height(self.right)
+        self.height = max(left_height, right_height) + 1
+
+    def set_right(self, node):
+        """
+        :type node: AVLNode
+        """
+        self.right = node
+        if node:
+            node.parent = self
+        self.recalc_height()
+
+    def set_left(self, node):
+        """
+        :type node: AVLNode
+        """
+        self.left = node
+        if node:
+            node.parent = self
+        self.recalc_height()
+
+    def __str__(self):
+        return '(%s)' % self.value
+
+
+class AVLTree:
+    def __init__(self):
+        self.root = None
+        "type : AVLNode"
+
+    def set_root(self, node):
+        """
+        :type node: AVLNode
+        """
+        self.root = node
+        if node:
+            node.parent = None
+
+    def add(self, value):
+        """Добавляет элементы в дерево"""
+        if self.root is None:
+            self.set_root(AVLNode(value))
+            return
+        add_in_avl_tree(value, self.root)
+
+    def delete(self, value):
+        pass
+
+    @staticmethod
+    def rotate_left(node):
+        """Делает левый поворот
+        """
+        new_node = AVLNode(node.value)
+        node.value = node.right.value
+
+        left_subtree = node.left
+        central_subtree = node.right.left
+        right_subtree = node.right.right
+
+        node.set_right(right_subtree)
+        node.set_left(new_node)
+
+        new_node.set_right(central_subtree)
+        new_node.set_left(left_subtree)
+
+    @staticmethod
+    def rotate_right(node):
+        """Делает правый поворот
+        """
+        new_node = AVLNode(node.value)
+        node.value = node.left.value
+
+        left_subtree = node.left.left
+        central_subtree = node.left.right
+        right_subtree = node.right
+
+        node.set_left(left_subtree)
+        node.set_right(new_node)
+
+        new_node.set_left(central_subtree)
+        new_node.set_right(right_subtree)
+
+    def __str__(self):
+        return 'AVLTree of height %s' % Tree.height(self.root)
+
+    def render(self, screen):
+        """
+        :type screen: screen.Screen
+        """
+        w, h = screen.get_size()
+        draw_subtree(self.root, 0, 0, w, h, Tree.height(self.root), screen)
+
+
+def add_in_avl_tree(value, node):
     """
-    :type root: Node
+    :type node: AVLNode
     """
-    if root.value == value:
+    if node.value == value:
+        rebalance_node(node)
         return
-    elif root.value < value:
-        if root.right is None:
-            root.set_right(Node(value))
-        elif root.right:
-            add_in_tree(value, root.right)
+    elif node.value < value:
+        if node.right is None:
+            node.set_right(AVLNode(value))
+        elif node.right:
+            Tree.add_in_tree(value, node.right)
+        rebalance_node(node.right)
         return
-    elif value < root.value:
-        if root.left is None:
-            root.set_left(Node(value))
-        elif root.left:
-            add_in_tree(value, root.left)
+    elif value < node.value:
+        if node.left is None:
+            node.set_left(AVLNode(value))
+        elif node.left:
+            Tree.add_in_tree(value, node.left)
+        rebalance_node(node.left)
         return
+
+
+def rebalance_node(node):
+    if AVLNode.get_height(node.left) - AVLNode.get_height(node.right) <= -2:
+        AVLTree.rotate_left(node)
+    elif AVLNode.get_height(node.left) - AVLNode.get_height(node.right) >= 2:
+        AVLTree.rotate_right(node)
+    if node.parent is None:
+        return
+    node.recalc_height()
+    rebalance_node(node.parent)
+
+
+#
+# ==========================================================================
+#
 
 
 class GeneratorStepper:
@@ -200,31 +364,27 @@ class GeneratorStepper:
             return False
 
 
-tree = Tree()
+tree = AVLTree()
 
 
 def tree_progress():
     yield tree.add(1)
-    yield tree.delete(1)
-    yield tree.add(1)
-    yield tree.add(0)
-    yield tree.delete(0)
     yield tree.add(2)
-    yield tree.add(1.5)
-    yield tree.delete(1)
     yield tree.add(3)
-    yield tree.add(1)
-    yield tree.add(1.2)
-    yield tree.add(2.3)
-    yield tree.add(2.2)
-    yield tree.add(2.1)
-    yield tree.add(4)
-    yield tree.delete(3)
     yield tree.add(4)
     yield tree.add(5)
     yield tree.add(6)
     yield tree.add(7)
+    yield tree.delete(1)
     yield tree.delete(2)
+    yield tree.delete(3)
+    yield tree.delete(4)
+    yield tree.delete(5)
+    yield tree.add(1)
+    yield tree.add(5)
+    yield tree.add(2)
+    yield tree.add(4)
+    yield tree.add(3)
     yield exit()
 
 stepper = GeneratorStepper(tree_progress)
@@ -241,7 +401,7 @@ def global2local(x, y, w, h):
 def draw_subtree(node, x, y, w, h, l, screen):
     """Рисует дерево
     :type screen: screen.Screen
-    :type node: Node
+    :type node: Node|AVLNode
     """
     if node is None:
         return
@@ -250,8 +410,12 @@ def draw_subtree(node, x, y, w, h, l, screen):
     draw_subtree(node.right, x + w / 2, y + level_h, w / 2, h - level_h, l - 1, screen)
     rect = global2local(x, y, w, level_h)
     screen.draw_frame(WHITE, *rect)
-    screen.draw_text(str(node.value), screen.get_font('Arial', 20), WHITE, *rect)
     x, y, w, h = rect
+    if isinstance(node, Node):
+        screen.draw_text(str(node.value), screen.get_font('Arial', 20), WHITE, *rect)
+    elif isinstance(node, AVLNode):
+        screen.draw_text(str(node.value), screen.get_font('Arial', 20), WHITE, x, y, w, 2*h/3)
+        screen.draw_text(str(node.height), screen.get_font('Arial', 20), WHITE, x, y+h/3, w, 2*h/3)
     if node.left is not None:
         screen.draw_arrow(WHITE, Vec2d(x + w / 4, y + h), Vec2d(x, y + 2*h))
     if node.right is not None:
