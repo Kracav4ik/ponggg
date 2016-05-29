@@ -154,7 +154,7 @@ class Tree:
     @staticmethod
     def min_node(node):
         """Ищет ноду с минимальным значением
-        :type node: Node
+        :type node: Node|AVLNode
         """
         while node.left:
             node = node.left
@@ -163,7 +163,7 @@ class Tree:
     @staticmethod
     def max_node(node):
         """Ищет ноду с максимальным значением
-        :type node: Node
+        :type node: Node|AVLNode
         """
         while node.right:
             node = node.right
@@ -247,6 +247,22 @@ class AVLTree:
         self.root = None
         "type : AVLNode"
 
+    @staticmethod
+    def find_node(value, root):
+        """
+        :type value: float
+        :type root: AVLNode
+        :return AVLNode
+        """
+        if root is None:
+            return None
+        if value == root.value:
+            return root
+        elif value > root.value:
+            return AVLTree.find_node(value, root.right)
+        else:
+            return AVLTree.find_node(value, root.left)
+
     def set_root(self, node):
         """
         :type node: AVLNode
@@ -263,7 +279,39 @@ class AVLTree:
         add_in_avl_tree(value, self.root)
 
     def delete(self, value):
-        pass
+        node = self.find_node(value, self.root)
+        if node is None:
+            return
+
+        parent = node.parent
+        if parent is None:
+            # удаляем корень дерева
+            set_node_func = self.set_root
+        elif node is parent.left:
+            # удаляемая вершина - левый ребенок
+            set_node_func = parent.set_left
+        else:
+            # удаляемая вершина - правый ребенок
+            set_node_func = parent.set_right
+
+        if node.left is None:
+            if node.right is None:
+                # удаляемая вершину без детей
+                set_node_func(None)
+            else:
+                # удаляемая вершину c правым ребенком
+                set_node_func(node.right)
+        else:
+            if node.right is None:
+                # удаляемая вершину c левым ребенком
+                set_node_func(node.left)
+            else:
+                # удаляемая вершину c двумя детьми
+                new_node_value = Tree.min_node(node.right).value
+                self.delete(new_node_value)
+                node.value = new_node_value
+                parent = None  # ребаланс не нужен -- он уже был в вызове delete
+        rebalance_node(parent)
 
     @staticmethod
     def rotate_left(node):
