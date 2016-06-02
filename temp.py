@@ -397,6 +397,74 @@ def rebalance_node(node):
 #
 
 
+class RBNode:
+    def __init__(self, value, is_red):
+        self.value = value
+        self.left = None
+        ":type : RBNode"
+        self.right = None
+        ":type : RBNode"
+        self.parent = None
+        ":type : RBNode"
+        self.is_red = is_red
+
+    def set_right(self, node):
+        """
+        :type node: RBNode
+        """
+        self.right = node
+        if node:
+            node.parent = self
+
+    def set_left(self, node):
+        """
+        :type node: RBNode
+        """
+        self.left = node
+        if node:
+            node.parent = self
+
+    def __str__(self):
+        return '[%s](%s)' % ('R' if self.is_red else 'B', self.value)
+
+
+class RBTree:
+    def __init__(self):
+        self.root = None
+        "type : RBNode"
+
+    def set_root(self, node):
+        """
+        :type node: RBNode
+        """
+        self.root = node
+        if node:
+            node.parent = None
+
+    def add(self, value):
+        """Добавляет элементы в дерево"""
+        if True or self.root is None:
+            self.set_root(RBNode(value, value % 2 == 0))
+            return
+
+    def delete(self, value):
+        self.root = None
+
+    def __str__(self):
+        return 'RBTree of height %s' % Tree.height(self.root)
+
+    def render(self, screen):
+        """
+        :type screen: screen.Screen
+        """
+        w, h = screen.get_size()
+        draw_subtree(self.root, 0, 0, w, h, Tree.height(self.root), screen)
+
+#
+# ==========================================================================
+#
+
+
 class GeneratorStepper:
     def __init__(self, generator_func):
         self.generator = generator_func()
@@ -412,7 +480,7 @@ class GeneratorStepper:
             return False
 
 
-tree = AVLTree()
+tree = RBTree()
 
 
 def tree_progress():
@@ -457,13 +525,17 @@ def draw_subtree(node, x, y, w, h, l, screen):
     draw_subtree(node.left, x, y + level_h, w / 2, h - level_h, l - 1, screen)
     draw_subtree(node.right, x + w / 2, y + level_h, w / 2, h - level_h, l - 1, screen)
     rect = global2local(x, y, w, level_h)
-    screen.draw_frame(WHITE, *rect)
     x, y, w, h = rect
     if isinstance(node, Node):
         screen.draw_text(str(node.value), screen.get_font('Arial', 20), WHITE, *rect)
     elif isinstance(node, AVLNode):
         screen.draw_text(str(node.value), screen.get_font('Arial', 20), WHITE, x, y, w, 2*h/3)
         screen.draw_text(str(node.height), screen.get_font('Arial', 20), WHITE, x, y+h/3, w, 2*h/3)
+    elif isinstance(node, RBNode):
+        color = (192, 0, 0) if node.is_red else (0, 0, 0)
+        screen.draw_rect(color, *rect)
+        screen.draw_text(str(node.value), screen.get_font('Arial', 30), WHITE, *rect)
+    screen.draw_frame(WHITE, *rect)
     if node.left is not None:
         screen.draw_arrow(WHITE, Vec2d(x + w / 4, y + h), Vec2d(x, y + 2*h))
     if node.right is not None:
