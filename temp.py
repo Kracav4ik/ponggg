@@ -493,7 +493,7 @@ def process_game(elapsed):
 pygame.init()
 
 WINDOW_SIZE = (1280, 720)  # размер окна в пикселах
-WINDOW_BG_COLOR = BLACK  # цвет окна
+WINDOW_BG_COLOR = (0,  64, 0)  # цвет окна
 
 render_manager = RenderManager(WINDOW_SIZE, WINDOW_BG_COLOR)
 
