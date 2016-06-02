@@ -311,7 +311,7 @@ class AVLTree:
                 self.delete(new_node_value)
                 node.value = new_node_value
                 parent = None  # ребаланс не нужен -- он уже был в вызове delete
-        rebalance_node(parent)
+        re_balance_avlnode(parent)
 
     @staticmethod
     def rotate_left(node):
@@ -363,25 +363,25 @@ def add_in_avl_tree(value, node):
     :type node: AVLNode
     """
     if node.value == value:
-        rebalance_node(node)
+        re_balance_avlnode(node)
         return
     elif node.value < value:
         if node.right is None:
             node.set_right(AVLNode(value))
         elif node.right:
             Tree.add_in_tree(value, node.right)
-        rebalance_node(node.right)
+        re_balance_avlnode(node.right)
         return
     elif value < node.value:
         if node.left is None:
             node.set_left(AVLNode(value))
         elif node.left:
             Tree.add_in_tree(value, node.left)
-        rebalance_node(node.left)
+        re_balance_avlnode(node.left)
         return
 
 
-def rebalance_node(node):
+def re_balance_avlnode(node):
     if AVLNode.get_height(node.left) - AVLNode.get_height(node.right) <= -2:
         AVLTree.rotate_left(node)
     elif AVLNode.get_height(node.left) - AVLNode.get_height(node.right) >= 2:
@@ -389,7 +389,7 @@ def rebalance_node(node):
     if node.parent is None:
         return
     node.recalc_height()
-    rebalance_node(node.parent)
+    re_balance_avlnode(node.parent)
 
 
 #
@@ -432,7 +432,6 @@ class RBTree:
     def __init__(self):
         self.root = None
         "type : RBNode"
-
     def set_root(self, node):
         """
         :type node: RBNode
@@ -443,12 +442,62 @@ class RBTree:
 
     def add(self, value):
         """Добавляет элементы в дерево"""
-        if True or self.root is None:
-            self.set_root(RBNode(value, value % 2 == 0))
+        if self.root is None:
+            self.root = RBNode(value, False)
             return
+        return add_in_rbtree(value, self.root)
 
     def delete(self, value):
+        # TODO
         self.root = None
+
+    @staticmethod
+    def is_left_child(node):
+        """
+        :type node: RBNode
+        """
+        return node.parent.value > node.value
+
+    @staticmethod
+    def is_red(node):
+        """
+        :type node: RBNode
+        """
+        return node is not None and node.is_red
+
+    @staticmethod
+    def rotate_left(node):
+        """Делает левый поворот
+        """
+        new_node = RBNode(node.value, True)
+        node.value = node.right.value
+
+        left_subtree = node.left
+        central_subtree = node.right.left
+        right_subtree = node.right.right
+
+        node.set_right(right_subtree)
+        node.set_left(new_node)
+
+        new_node.set_right(central_subtree)
+        new_node.set_left(left_subtree)
+
+    @staticmethod
+    def rotate_right(node):
+        """Делает правый поворот
+        """
+        new_node = RBNode(node.value, True)
+        node.value = node.left.value
+
+        left_subtree = node.left.left
+        central_subtree = node.left.right
+        right_subtree = node.right
+
+        node.set_left(left_subtree)
+        node.set_right(new_node)
+
+        new_node.set_left(central_subtree)
+        new_node.set_right(right_subtree)
 
     def __str__(self):
         return 'RBTree of height %s' % Tree.height(self.root)
@@ -459,6 +508,79 @@ class RBTree:
         """
         w, h = screen.get_size()
         draw_subtree(self.root, 0, 0, w, h, Tree.height(self.root), screen)
+
+
+def re_balance_rbnode(node):
+    """
+    :type node: RBNode
+    """
+
+    dad = node.parent
+    if dad is None:
+        # корень всегда черный
+        node.is_red = False
+        return
+    if not RBTree.is_red(dad):
+        return
+
+    grandpa = dad.parent
+    assert not RBTree.is_red(grandpa)
+
+    dad_is_left_child = RBTree.is_left_child(dad)
+    if dad_is_left_child:
+        # отец - левый ребенок, дядя - правый ребенок деда
+        uncle = grandpa.right
+        rotate_func = RBTree.rotate_right
+    else:
+        # отец - правый ребенок, дядя - левый ребенок деда
+        uncle = grandpa.left
+        rotate_func = RBTree.rotate_left
+
+    if RBTree.is_red(uncle):
+        dad.is_red = False
+        uncle.is_red = False
+        grandpa.is_red = True
+        re_balance_rbnode(grandpa)
+    else:
+        node_is_left_child = RBTree.is_left_child(node)
+        # поворот деда работает только если и нода и отец одновременно левые или одновременно правые дети
+        if dad_is_left_child:
+            if not node_is_left_child:
+                RBTree.rotate_left(dad)
+                node = dad.left
+                # и новая нода и отец - левые дети
+        else:
+            if node_is_left_child:
+                RBTree.rotate_right(dad)
+                node = dad.right
+                # и новая нода и отец - правые дети
+        rotate_func(grandpa)
+        new_dad = node.parent
+        new_dad.is_red = False
+        new_dad.left.is_red = True
+        new_dad.right.is_red = True
+
+
+def add_in_rbtree(value, node):
+    """
+    :type node: RBNode
+    """
+    if node.value == value:
+        return
+    elif node.value < value:
+        if node.right is None:
+            node.set_right(RBNode(value, True))
+            re_balance_rbnode(node.right)
+        else:
+            add_in_rbtree(value, node.right)
+        return
+    elif value < node.value:
+        if node.left is None:
+            node.set_left(RBNode(value, True))
+            re_balance_rbnode(node.left)
+        else:
+            add_in_rbtree(value, node.left)
+        return
 
 #
 # ==========================================================================
@@ -491,6 +613,13 @@ def tree_progress():
     yield tree.add(5)
     yield tree.add(6)
     yield tree.add(7)
+    yield tree.add(8)
+    yield tree.add(9)
+    yield tree.add(10)
+    yield tree.add(11)
+    yield tree.add(12)
+    yield tree.add(13)
+    yield tree.add(14)
     yield tree.delete(1)
     yield tree.delete(2)
     yield tree.delete(3)
