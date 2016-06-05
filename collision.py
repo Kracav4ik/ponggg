@@ -82,6 +82,9 @@ class BBoxNode:
         self.color = Color4.from_hsv(random.randint(0, 359), 50, 50)
 
     def bbox(self):
+        """
+        :rtype : AABB
+        """
         if self.obj:
             return self.obj.bbox().extend(1.1)
         else:
