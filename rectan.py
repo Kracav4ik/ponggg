@@ -1,4 +1,5 @@
 # encoding: utf-8
+from collision import AABB
 from utils import Vec2d
 
 
@@ -22,6 +23,9 @@ class Rect:
         w, h = 2*self.half_extents
         screen.draw_rect(self.color, x, y, w, h)
         screen.draw_frame(self.color*1.5, x, y, w, h)
+
+    def bbox(self):
+        return AABB(self.pos + self.half_extents, self.pos - self.half_extents)
 
     def set_pos(self, pos):
         """

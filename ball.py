@@ -1,6 +1,7 @@
 # encoding: utf-8
 from math import *
 
+from collision import AABB
 from utils import Vec2d, unit_vector, WHITE, Color4
 
 BALL_COLOR = Color4(255, 128, 128)
@@ -31,6 +32,10 @@ class Ball:
         # for i in range(len(self.pos_list)-1):
         #     screen.draw_arrow(self.trace_color, self.pos_list[i], self.pos_list[i+1], length=(self.pos_list[i] - self.pos_list[i+1]).len())
         screen.draw_polyline(self.trace_color, self.pos_list)
+
+    def bbox(self):
+        half_extents = Vec2d(self.r, self.r)
+        return AABB(self.pos + half_extents, self.pos - half_extents)
 
     def set_pos(self, pos):
         """

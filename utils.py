@@ -210,7 +210,7 @@ class Color4:
     def from_hsv(h, s, v):
         """
         :type h: int|float
-        :param h: Hue, 0..360
+        :param h: Hue, 0..359
         :type s: int|float
         :param s: Saturation, 0..100
         :type v: int|float

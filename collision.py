@@ -1,5 +1,7 @@
 # encoding: utf-8
-from utils import Vec2d, dot, cross, component_mul, max_coords, min_coords
+import random
+
+from utils import Vec2d, dot, cross, component_mul, max_coords, min_coords, Color4
 
 
 class AABB:
@@ -38,6 +40,7 @@ class AABB:
     def union(self, aabb):
         """
         :type aabb: AABB
+        :rtype : AABB
         """
         return AABB(self.bbl, self.fur, aabb.bbl, aabb.fur)
 
@@ -59,25 +62,41 @@ class AABB:
         :type value: int|float
         """
         if not self:
-            return
+            return self
         center = (self.bbl + self.fur) / 2
-        self.bbl = center + (self.bbl - center)*value
-        self.fur = center + (self.fur - center)*value
+        bbl = center + (self.bbl - center)*value
+        fur = center + (self.fur - center)*value
+        return AABB(bbl, fur)
 
 
 class BBoxNode:
     def __init__(self, obj=None):
+        """
+        :type obj: rectan.Rect|poly.Polygon|ball.Ball
+        """
         self.obj = obj
-        self.bbox = AABB()
         self.left = None
         ":type : BBoxNode"
         self.right = None
         ":type : BBoxNode"
+        self.color = Color4.from_hsv(random.randint(0, 359), 50, 50)
+
+    def bbox(self):
+        if self.obj:
+            return self.obj.bbox().extend(1.1)
+        else:
+            left_box = AABB() if self.left is None else self.left.bbox()
+            right_box = AABB() if self.right is None else self.right.bbox()
+            return left_box.union(right_box).extend(1.1)
 
     def render(self, screen):
         """
         :type screen: screen.Screen
         """
+        bbox = self.bbox()
+        x, y = bbox.bbl
+        w, h = bbox.fur - bbox.bbl
+        screen.draw_frame(self.color, x, y, w, h)
         if self.left:
             self.left.render(screen)
         if self.right:
@@ -90,7 +109,34 @@ class BBoxTree:
         ":type : BBoxNode"
 
     def add(self, obj):
-        self.root = BBoxNode(obj)
+        if not self.root:
+            self.root = BBoxNode(obj)
+        else:
+            def insert(node):
+                """
+                :type node: BBoxNode
+                """
+                to_left = random.choice([True, False])
+                if to_left:
+                    if node.left:
+                        insert(node.left)
+                    else:
+                        node.left = BBoxNode(obj)
+                        assert node.obj
+                        node.right = BBoxNode(node.obj)
+                        node.obj = None
+                else:
+                    if node.right:
+                        insert(node.right)
+                    else:
+                        node.right = BBoxNode(obj)
+                        assert node.obj
+                        node.left = BBoxNode(node.obj)
+                        node.obj = None
+            insert(self.root)
+
+    def clear(self):
+        self.root = None
 
     def query_box(self, bbox):
         """

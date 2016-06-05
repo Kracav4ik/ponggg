@@ -7,6 +7,7 @@ import pygame
 
 from background import Blackground
 from ball import Ball
+from collision import BBoxTree
 from physics import PhysicsEngine
 from poly import Polygon
 from rectan import Rect
@@ -133,7 +134,7 @@ def create_rects(x_count, y_count):
             max_idx = x_count + y_count - 2
             rect.speed = Vec2d(100 + 300*idx/max_idx, -150 + 370*idx/max_idx)
             result.append(rect)
-    return result
+    return []  # TODO: result
 
 
 rect_list = create_rects(10, 5)
@@ -143,6 +144,11 @@ clock = pygame.time.Clock()
 clock.tick()
 
 debug_text = DebugText()
+
+bbox_tree = BBoxTree()
+
+for b in balls_list:
+    bbox_tree.add(b)
 
 cursor = DebugCursor()
 
@@ -155,6 +161,7 @@ render_manager.add_drawables(backyblacky)
 render_manager.add_drawables(*balls_list)
 render_manager.add_drawables(*rect_list)
 render_manager.add_drawables(megapoly)
+render_manager.add_drawables(bbox_tree)
 render_manager.add_drawables(debug_text)
 render_manager.add_drawables(cursor)
 

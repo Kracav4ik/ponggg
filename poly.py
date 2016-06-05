@@ -1,4 +1,5 @@
 # encoding: utf-8
+from collision import AABB
 from utils import Vec2d, Color4
 
 DEFAULT_COLOR = Color4(128, 255, 32)
@@ -35,3 +36,6 @@ class Polygon:
         else:
             screen.draw_polyline(DEFAULT_COLOR, self.points, True)
         screen.draw_polyline(DEFAULT_COLOR, [self.center(), self.center()])
+
+    def bbox(self):
+        return AABB(*self.points)
