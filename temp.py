@@ -447,6 +447,7 @@ class RBTree:
     def __init__(self):
         self.root = None
         "type : RBNode"
+
     def set_root(self, node):
         """
         :type node: RBNode
@@ -454,6 +455,7 @@ class RBTree:
         self.root = node
         if node:
             node.reset_parent()
+            node.is_red = False
 
     def add(self, value):
         """Добавляет элементы в дерево"""
@@ -467,37 +469,46 @@ class RBTree:
         if node is None:
             return
 
-        parent = node.parent
-        if parent is None:
-            # удаляем корень дерева
-            set_node_func = self.set_root
-        elif node is parent.left:
-            # удаляемая вершина - левый ребенок
-            set_node_func = parent.set_left
-        else:
-            # удаляемая вершина - правый ребенок
-            set_node_func = parent.set_right
+        def set_node_func(_node):
+            """
+            :type _node: RBNode
+            :rtype : (RBNode) -> None
+            """
+            parent = _node.parent
+            if parent is None:
+                # удаляем корень дерева
+                return self.set_root
+            elif _node is parent.left:
+                # удаляемая вершина - левый ребенок
+                return parent.set_left
+            else:
+                # удаляемая вершина - правый ребенок
+                return parent.set_right
 
         if node.left is None:
             if node.right is None:
-                # удаляемая вершину без детей
-                set_node_func(None)
+                # удаляемая вершина без детей
+                if self.is_black(node):
+                    # удаление черной ноды без детей уменьшит длину черных путей
+                    self.re_balance_rbnode_del(node)
+                set_node_func(node)(None)
             else:
-                # удаляемая вершину c правым ребенком
-                set_node_func(node.right)
-                # if not node.is_red:
-
+                # удаляемая вершина c правым ребенком (единственный ребенок ноды может быть только красным)
+                assert node.right.is_red
+                node.right.is_red = False
+                set_node_func(node)(node.right)
         else:
             if node.right is None:
-                # удаляемая вершину c левым ребенком
-                set_node_func(node.left)
+                # удаляемая вершина c левым ребенком (единственный ребенок ноды может быть только красным)
+                assert node.left.is_red
+                node.left.is_red = False
+                set_node_func(node)(node.left)
             else:
-                # удаляемая вершину c двумя детьми
+                # удаляемая вершина c двумя детьми
                 new_node_value = Tree.min_node(node.right).value
                 self.delete(new_node_value)
                 node.value = new_node_value
-                return  # ребаланс не нужен -- он уже был в вызове delete
-        # TODO: ребаланс
+                # ребаланс не нужен -- он уже был в вызове delete
 
     @staticmethod
     def find_node(value, root):
@@ -530,11 +541,19 @@ class RBTree:
         return node is not None and node.is_red
 
     @staticmethod
+    def is_black(node):
+        """
+        :type node: RBNode
+        """
+        return not RBTree.is_red(node)
+
+    @staticmethod
     def rotate_left(node):
         """Делает левый поворот
         """
-        new_node = RBNode(node.value, True)
+        new_node = RBNode(node.value, node.is_red)
         node.value = node.right.value
+        node.is_red = node.right.is_red
 
         left_subtree = node.left
         central_subtree = node.right.left
@@ -550,8 +569,9 @@ class RBTree:
     def rotate_right(node):
         """Делает правый поворот
         """
-        new_node = RBNode(node.value, True)
+        new_node = RBNode(node.value, node.is_red)
         node.value = node.left.value
+        node.is_red = node.left.is_red
 
         left_subtree = node.left.left
         central_subtree = node.left.right
@@ -574,39 +594,77 @@ class RBTree:
         draw_subtree(self.root, 0, 0, w, h, Tree.height(self.root), screen)
 
     def re_balance_rbnode_del(self, node):
-        if not node or node.is_red or not self.root:
-            return
-        elif not node.parent:
-            self.root.is_red = False
+        """
+        https://ru.wikipedia.org/wiki/Красно-чёрное_дерево#.D0.A3.D0.B4.D0.B0.D0.BB.D0.B5.D0.BD.D0.B8.D0.B5
+        :type node: RBNode
+        """
+        assert node is not None
+        assert self.is_black(node)
+
+        # Случай 1
+        if not node.parent:
             return
 
-        me_is_left_child = self.is_left_child(node)
-        if me_is_left_child:
+        node_is_left_child = self.is_left_child(node)
+        if node_is_left_child:
             bro = node.parent.right
         else:
             bro = node.parent.left
-        if node.parent.is_red:
-            node.parent.is_red = False
-            bro.is_red = True
-            if me_is_left_child:
+
+        # Случай 2
+        if self.is_red(bro):
+            node.parent.is_red = True
+            bro.is_red = False
+            if node_is_left_child:
                 self.rotate_left(node.parent)
+                bro = node.parent.right
             else:
                 self.rotate_right(node.parent)
-            return
-        else:
-            if not node.parent.parent:
-                if me_is_left_child:
-                    self.rotate_left(node.parent)
-                else:
-                    self.rotate_right(node.parent)
-            else:
-                if self.is_left_child(node.parent):
-                    self.rotate_left(node.parent.parent)
-                else:
-                    self.rotate_right(node.parent.parent)
-                bro.is_red = True
+                bro = node.parent.left
 
+        # Случай 3
+        if self.is_black(node.parent) and self.is_black(bro) and self.is_black(bro.left) and self.is_black(bro.right):
+            bro.is_red = True
             self.re_balance_rbnode_del(node.parent)
+            return
+
+        # Случай 4
+        if self.is_red(node.parent) and self.is_black(bro) and self.is_black(bro.left) and self.is_black(bro.right):
+            node.parent.is_red = False
+            bro.is_red = True
+            return
+
+        # Случай 5
+        if node_is_left_child:
+            if self.is_black(bro.right):
+                assert self.is_red(bro.left)
+                bro.left.is_red = False
+                bro.is_red = True
+                self.rotate_right(bro)
+                bro = node.parent.right
+        else:
+            if self.is_black(bro.left):
+                assert self.is_red(bro.right)
+                bro.right.is_red = False
+                bro.is_red = True
+                self.rotate_left(bro)
+                bro = node.parent.left
+
+        # Случай 6
+        if node_is_left_child:
+            assert self.is_black(bro) and self.is_red(bro.right)
+            parent_is_red = self.is_red(node.parent)
+            node.parent.is_red = False
+            bro.is_red = parent_is_red
+            bro.right.is_red = False
+            self.rotate_left(node.parent)
+        else:
+            assert self.is_black(bro) and self.is_red(bro.left)
+            parent_is_red = self.is_red(node.parent)
+            node.parent.is_red = False
+            bro.is_red = parent_is_red
+            bro.left.is_red = False
+            self.rotate_right(node.parent)
 
 
 def re_balance_rbnode_add(node):
@@ -619,11 +677,11 @@ def re_balance_rbnode_add(node):
         # корень всегда черный
         node.is_red = False
         return
-    if not RBTree.is_red(dad):
+    if RBTree.is_black(dad):
         return
 
     grandpa = dad.parent
-    assert not RBTree.is_red(grandpa)
+    assert RBTree.is_black(grandpa)
 
     dad_is_left_child = RBTree.is_left_child(dad)
     if dad_is_left_child:
