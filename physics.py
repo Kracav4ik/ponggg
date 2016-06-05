@@ -2,25 +2,24 @@
 from background import Blackground
 from ball import Ball
 from collision import collide_circle_with_border, collide_circle_with_poly, collide_circle_with_circle, \
-    collide_rect_with_border, collide_rect_with_rect
+    collide_rect_with_border, collide_rect_with_rect, BBoxTree
 from poly import Polygon
 from rectan import Rect
 
 
 class PhysicsEngine:
-    def __init__(self, gravity, tree):
-        """
-        :type tree: collision.BBoxTree
-        """
+    def __init__(self, gravity):
         self.gravity = gravity
         self.bodies = []
         self.manifolds = 0
         self.collide_tests = 0
         self.tree_tests = 0
-        self.tree = tree
+        self.tree = BBoxTree()
 
     def add_bodies(self, *bodies):
         self.bodies.extend(bodies)
+        for b in bodies:
+            self.tree.add(b)
 
     def process(self, elapsed):
         self.manifolds = 0
@@ -31,6 +30,8 @@ class PhysicsEngine:
                 body.speed += 0.5 * self.gravity * elapsed
                 body.set_pos(body.pos + body.speed * elapsed)
                 body.speed += 0.5 * self.gravity * elapsed
+
+        self.tree.recalc_bbox()
 
         collisions_list = []
         collided = set()

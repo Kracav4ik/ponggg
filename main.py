@@ -7,7 +7,6 @@ import pygame
 
 from background import Blackground
 from ball import Ball
-from collision import BBoxTree
 from physics import PhysicsEngine
 from poly import Polygon
 from rectan import Rect
@@ -80,9 +79,7 @@ WINDOW_BG_COLOR = BLACK  # цвет окна
 OFFSET = 50
 GRAVITY = Vec2d(0, 500)
 
-bbox_tree = BBoxTree()
-
-phys_engine = PhysicsEngine(GRAVITY, bbox_tree)
+phys_engine = PhysicsEngine(GRAVITY)
 
 render_manager = RenderManager(WINDOW_SIZE, WINDOW_BG_COLOR)
 
@@ -147,9 +144,6 @@ clock.tick()
 
 debug_text = DebugText()
 
-for b in rect_list:
-    bbox_tree.add(b)
-
 cursor = DebugCursor()
 
 phys_engine.add_bodies(backyblacky)
@@ -161,7 +155,7 @@ render_manager.add_drawables(backyblacky)
 render_manager.add_drawables(*balls_list)
 render_manager.add_drawables(*rect_list)
 render_manager.add_drawables(megapoly)
-render_manager.add_drawables(bbox_tree)
+render_manager.add_drawables(phys_engine.tree)
 render_manager.add_drawables(debug_text)
 render_manager.add_drawables(cursor)
 
@@ -172,7 +166,7 @@ while True:
     frame_start = time.time()
 
     handle_input()
-    process_game(0.003*elapsed / 1000)
+    process_game(0.3*elapsed / 1000)
     render_manager.render()
 
     frame_time = (time.time() - frame_start) * 1000

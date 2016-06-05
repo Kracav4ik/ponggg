@@ -46,7 +46,13 @@ class AABB:
         new_fur = max_coords(self.fur, aabb.fur)
         return AABB(bbl=new_bbl, fur=new_fur)
 
-    def intersection(self, aabb):
+    def intersects(self, aabb):
+        if self and aabb:
+            return max(self.bbl.data[0], aabb.bbl.data[0]) <= min(self.fur.data[0], aabb.fur.data[0]) \
+                   and max(self.bbl.data[1], aabb.bbl.data[1]) <= min(self.fur.data[1], aabb.fur.data[1])
+        return False
+
+    def intersection_bbox(self, aabb):
         """
         :type aabb: AABB
         """
@@ -84,17 +90,27 @@ class BBoxNode:
         self.right = None
         ":type : BBoxNode"
         self.color = Color4.from_hsv(random.randint(0, 359), 50, 50)
+        self.__bbox = None
 
     def bbox(self):
         """
         :rtype : AABB
         """
-        if self.obj:
-            return self.obj.bbox().extend(1.1)
-        else:
-            left_box = AABB() if self.left is None else self.left.bbox()
-            right_box = AABB() if self.right is None else self.right.bbox()
-            return left_box.union(right_box).extend(1.1)
+        if self.__bbox is None:
+            if self.obj:
+                self.__bbox = self.obj.bbox().extend(1.1)
+            else:
+                left_box = AABB() if self.left is None else self.left.bbox()
+                right_box = AABB() if self.right is None else self.right.bbox()
+                self.__bbox = left_box.union(right_box).extend(1.1)
+        return self.__bbox
+
+    def recalc_bbox(self):
+        self.__bbox = None
+        if self.left:
+            self.left.recalc_bbox()
+        if self.right:
+            self.right.recalc_bbox()
 
     def render(self, screen):
         """
@@ -145,23 +161,28 @@ class BBoxTree:
     def clear(self):
         self.root = None
 
+    def recalc_bbox(self):
+        if self.root:
+            self.root.recalc_bbox()
+
+    def __query(self, node, bbox):
+        """
+        :type node: BBoxNode
+        """
+        if not node:
+            return []
+        if bbox.intersects(node.bbox()):
+            if node.obj:
+                return [node.obj]
+            else:
+                return self.__query(node.left, bbox) + self.__query(node.right, bbox)
+        return []
+
     def query_box(self, bbox):
         """
         :type bbox: AABB
         """
-        def query(node):
-            """
-            :type node: BBoxNode
-            """
-            if not node:
-                return []
-            if bbox.intersection(node.bbox()):
-                if node.obj:
-                    return [node.obj]
-                else:
-                    return query(node.left) + query(node.right)
-            return []
-        return query(self.root)
+        return self.__query(self.root, bbox)
 
     def render(self, screen):
         """
