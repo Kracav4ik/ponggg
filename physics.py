@@ -14,6 +14,7 @@ class PhysicsEngine:
         self.manifolds = 0
         self.collide_tests = 0
         self.tree_tests = 0
+        self.query_calls = []
         self.tree = BBoxTree()
 
     def add_bodies(self, *bodies):
@@ -25,6 +26,7 @@ class PhysicsEngine:
         self.manifolds = 0
         self.collide_tests = 0
         self.tree_tests = 0
+        self.query_calls = []
         for body in self.bodies:
             if isinstance(body, (Ball, Rect)):
                 body.speed += 0.5 * self.gravity * elapsed
@@ -39,7 +41,8 @@ class PhysicsEngine:
             body1 = self.bodies[i1]
             box1 = body1.bbox()
             self.tree_tests += 1
-            bodies2 = self.tree.query_box(box1)
+            bodies2, counter = self.tree.query_box(box1)
+            self.query_calls.extend(counter)
             # bodies2 = self.bodies
             for body2 in bodies2:
                 if body1 is body2 or (body2, body1) in collided:

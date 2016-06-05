@@ -112,6 +112,11 @@ class BBoxNode:
         if self.right:
             self.right.recalc_bbox()
 
+    def height(self):
+        def h(node):
+            return 0 if node is None else node.height()
+        return 1 + max(h(self.left), h(self.right))
+
     def render(self, screen):
         """
         :type screen: screen.Screen
@@ -130,6 +135,9 @@ class BBoxTree:
     def __init__(self):
         self.root = None
         ":type : BBoxNode"
+
+    def height(self):
+        return 0 if self.root is None else self.root.height()
 
     def add(self, obj):
         if not self.root:
@@ -165,24 +173,27 @@ class BBoxTree:
         if self.root:
             self.root.recalc_bbox()
 
-    def __query(self, node, bbox):
+    def __query(self, node, bbox, counter):
         """
         :type node: BBoxNode
         """
         if not node:
             return []
+        counter[0] += 1
         if bbox.intersects(node.bbox()):
             if node.obj:
                 return [node.obj]
             else:
-                return self.__query(node.left, bbox) + self.__query(node.right, bbox)
+                return self.__query(node.left, bbox, counter) + self.__query(node.right, bbox, counter)
         return []
 
     def query_box(self, bbox):
         """
         :type bbox: AABB
         """
-        return self.__query(self.root, bbox)
+        counter = [0]
+        result = self.__query(self.root, bbox, counter)
+        return result, counter
 
     def render(self, screen):
         """

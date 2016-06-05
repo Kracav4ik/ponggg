@@ -136,7 +136,7 @@ def create_rects(x_count, y_count):
     return result
 
 
-rect_list = create_rects(10, 5)
+rect_list = create_rects(40, 20)
 
 MAX_FPS = 50
 clock = pygame.time.Clock()
@@ -166,7 +166,7 @@ while True:
     frame_start = time.time()
 
     handle_input()
-    process_game(0.3*elapsed / 1000)
+    process_game(0.003*elapsed / 1000)
     render_manager.render()
 
     frame_time = (time.time() - frame_start) * 1000
@@ -180,6 +180,8 @@ while True:
         Ep -= dot(GRAVITY, ball.pos)
     debug_text.add_line('potential energy %.2f' % Ep)
     debug_text.add_line('full energy %.2f' % (Ek + Ep))
-    debug_text.add_line('tree queries %d' % phys_engine.tree_tests)
+    debug_text.add_line('tree height %d queries %d' % (phys_engine.tree.height(), phys_engine.tree_tests))
     debug_text.add_line('collisions %d' % phys_engine.collide_tests)
     debug_text.add_line('manifolds %3d' % phys_engine.manifolds)
+    calls = phys_engine.query_calls
+    debug_text.add_line('queries min %4d max %4d avg %.1f' % (min(calls), max(calls), sum(calls)/len(calls)))
