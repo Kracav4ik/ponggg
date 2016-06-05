@@ -54,6 +54,57 @@ class AABB:
                 result.add(new_fur)
         return result
 
+    def extend(self, value):
+        """Увеличивает размер ббокса в value раз
+        :type value: int|float
+        """
+        if not self:
+            return
+        center = (self.bbl + self.fur) / 2
+        self.bbl = center + (self.bbl - center)*value
+        self.fur = center + (self.fur - center)*value
+
+
+class BBoxNode:
+    def __init__(self, obj=None):
+        self.obj = obj
+        self.bbox = AABB()
+        self.left = None
+        ":type : BBoxNode"
+        self.right = None
+        ":type : BBoxNode"
+
+    def render(self, screen):
+        """
+        :type screen: screen.Screen
+        """
+        if self.left:
+            self.left.render(screen)
+        if self.right:
+            self.right.render(screen)
+
+
+class BBoxTree:
+    def __init__(self):
+        self.root = None
+        ":type : BBoxNode"
+
+    def add(self, obj):
+        self.root = BBoxNode(obj)
+
+    def query_box(self, bbox):
+        """
+        :type bbox: AABB
+        """
+        return []
+
+    def render(self, screen):
+        """
+        :type screen: screen.Screen
+        """
+        if self.root:
+            self.root.render(screen)
+
 
 class Manifold:
     def collide(self):
