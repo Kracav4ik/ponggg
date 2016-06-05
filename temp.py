@@ -154,7 +154,7 @@ class Tree:
     @staticmethod
     def min_node(node):
         """Ищет ноду с минимальным значением
-        :type node: Node|AVLNode
+        :type node: Node|AVLNode|RBNode
         """
         while node.left:
             node = node.left
@@ -163,7 +163,7 @@ class Tree:
     @staticmethod
     def max_node(node):
         """Ищет ноду с максимальным значением
-        :type node: Node|AVLNode
+        :type node: Node|AVLNode|RBNode
         """
         while node.right:
             node = node.right
@@ -400,29 +400,44 @@ def re_balance_avlnode(node):
 class RBNode:
     def __init__(self, value, is_red):
         self.value = value
-        self.left = None
+        self.__left = None
         ":type : RBNode"
-        self.right = None
+        self.__right = None
         ":type : RBNode"
-        self.parent = None
+        self.__parent = None
         ":type : RBNode"
         self.is_red = is_red
+
+    @property
+    def left(self):
+        return self.__left
+
+    @property
+    def right(self):
+        return self.__right
+
+    @property
+    def parent(self):
+        return self.__parent
 
     def set_right(self, node):
         """
         :type node: RBNode
         """
-        self.right = node
+        self.__right = node
         if node:
-            node.parent = self
+            node.__parent = self
 
     def set_left(self, node):
         """
         :type node: RBNode
         """
-        self.left = node
+        self.__left = node
         if node:
-            node.parent = self
+            node.__parent = self
+
+    def reset_parent(self):
+        self.__parent = None
 
     def __str__(self):
         return '[%s](%s)' % ('R' if self.is_red else 'B', self.value)
@@ -438,7 +453,7 @@ class RBTree:
         """
         self.root = node
         if node:
-            node.parent = None
+            node.reset_parent()
 
     def add(self, value):
         """Добавляет элементы в дерево"""
@@ -448,8 +463,57 @@ class RBTree:
         return add_in_rbtree(value, self.root)
 
     def delete(self, value):
-        # TODO
-        self.root = None
+        node = self.find_node(value, self.root)
+        if node is None:
+            return
+
+        parent = node.parent
+        if parent is None:
+            # удаляем корень дерева
+            set_node_func = self.set_root
+        elif node is parent.left:
+            # удаляемая вершина - левый ребенок
+            set_node_func = parent.set_left
+        else:
+            # удаляемая вершина - правый ребенок
+            set_node_func = parent.set_right
+
+        if node.left is None:
+            if node.right is None:
+                # удаляемая вершину без детей
+                set_node_func(None)
+            else:
+                # удаляемая вершину c правым ребенком
+                set_node_func(node.right)
+                # if not node.is_red:
+
+        else:
+            if node.right is None:
+                # удаляемая вершину c левым ребенком
+                set_node_func(node.left)
+            else:
+                # удаляемая вершину c двумя детьми
+                new_node_value = Tree.min_node(node.right).value
+                self.delete(new_node_value)
+                node.value = new_node_value
+                return  # ребаланс не нужен -- он уже был в вызове delete
+        # TODO: ребаланс
+
+    @staticmethod
+    def find_node(value, root):
+        """
+        :type value: float
+        :type root: RBNode
+        :return RBNode
+        """
+        if root is None:
+            return None
+        if value == root.value:
+            return root
+        elif value > root.value:
+            return RBTree.find_node(value, root.right)
+        else:
+            return RBTree.find_node(value, root.left)
 
     @staticmethod
     def is_left_child(node):
@@ -509,8 +573,43 @@ class RBTree:
         w, h = screen.get_size()
         draw_subtree(self.root, 0, 0, w, h, Tree.height(self.root), screen)
 
+    def re_balance_rbnode_del(self, node):
+        if not node or node.is_red or not self.root:
+            return
+        elif not node.parent:
+            self.root.is_red = False
+            return
 
-def re_balance_rbnode(node):
+        me_is_left_child = self.is_left_child(node)
+        if me_is_left_child:
+            bro = node.parent.right
+        else:
+            bro = node.parent.left
+        if node.parent.is_red:
+            node.parent.is_red = False
+            bro.is_red = True
+            if me_is_left_child:
+                self.rotate_left(node.parent)
+            else:
+                self.rotate_right(node.parent)
+            return
+        else:
+            if not node.parent.parent:
+                if me_is_left_child:
+                    self.rotate_left(node.parent)
+                else:
+                    self.rotate_right(node.parent)
+            else:
+                if self.is_left_child(node.parent):
+                    self.rotate_left(node.parent.parent)
+                else:
+                    self.rotate_right(node.parent.parent)
+                bro.is_red = True
+
+            self.re_balance_rbnode_del(node.parent)
+
+
+def re_balance_rbnode_add(node):
     """
     :type node: RBNode
     """
@@ -540,7 +639,7 @@ def re_balance_rbnode(node):
         dad.is_red = False
         uncle.is_red = False
         grandpa.is_red = True
-        re_balance_rbnode(grandpa)
+        re_balance_rbnode_add(grandpa)
     else:
         node_is_left_child = RBTree.is_left_child(node)
         # поворот деда работает только если и нода и отец одновременно левые или одновременно правые дети
@@ -570,14 +669,14 @@ def add_in_rbtree(value, node):
     elif node.value < value:
         if node.right is None:
             node.set_right(RBNode(value, True))
-            re_balance_rbnode(node.right)
+            re_balance_rbnode_add(node.right)
         else:
             add_in_rbtree(value, node.right)
         return
     elif value < node.value:
         if node.left is None:
             node.set_left(RBNode(value, True))
-            re_balance_rbnode(node.left)
+            re_balance_rbnode_add(node.left)
         else:
             add_in_rbtree(value, node.left)
         return
@@ -620,9 +719,9 @@ def tree_progress():
     yield tree.add(12)
     yield tree.add(13)
     yield tree.add(14)
-    yield tree.delete(1)
-    yield tree.delete(2)
     yield tree.delete(3)
+    yield tree.delete(2)
+    yield tree.delete(1)
     yield tree.delete(4)
     yield tree.delete(5)
     yield tree.add(1)
