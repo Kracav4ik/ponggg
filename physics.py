@@ -11,11 +11,15 @@ class PhysicsEngine:
     def __init__(self, gravity):
         self.gravity = gravity
         self.bodies = []
+        self.manifolds = 0
+        self.collide_tests = 0
 
     def add_bodies(self, *bodies):
         self.bodies.extend(bodies)
 
     def process(self, elapsed):
+        self.manifolds = 0
+        self.collide_tests = 0
         for body in self.bodies:
             if isinstance(body, (Ball, Rect)):
                 body.speed += 0.5 * self.gravity * elapsed
@@ -27,8 +31,10 @@ class PhysicsEngine:
             for i2 in range(i1 + 1, len(self.bodies)):
                 body1 = self.bodies[i1]
                 body2 = self.bodies[i2]
+                self.collide_tests += 1
                 manifold = self.__collide_bodies(body1, body2)
                 if manifold:
+                    self.manifolds += 1
                     collisions_list.append(manifold)
 
         for manifold in collisions_list:

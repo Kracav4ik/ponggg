@@ -134,7 +134,7 @@ def create_rects(x_count, y_count):
             max_idx = x_count + y_count - 2
             rect.speed = Vec2d(100 + 300*idx/max_idx, -150 + 370*idx/max_idx)
             result.append(rect)
-    return []  # TODO: result
+    return result
 
 
 rect_list = create_rects(10, 5)
@@ -147,7 +147,7 @@ debug_text = DebugText()
 
 bbox_tree = BBoxTree()
 
-for b in balls_list:
+for b in rect_list:
     bbox_tree.add(b)
 
 cursor = DebugCursor()
@@ -186,3 +186,5 @@ while True:
         Ep -= dot(GRAVITY, ball.pos)
     debug_text.add_line('potential energy %.2f' % Ep)
     debug_text.add_line('full energy %.2f' % (Ek + Ep))
+    debug_text.add_line('collisions %d' % phys_engine.collide_tests)
+    debug_text.add_line('manifolds %3d' % phys_engine.manifolds)
