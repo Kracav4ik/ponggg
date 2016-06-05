@@ -52,6 +52,12 @@ class AABB:
                    and max(self.bbl.data[1], aabb.bbl.data[1]) <= min(self.fur.data[1], aabb.fur.data[1])
         return False
 
+    def perimeter(self):
+        if not self:
+            return 0
+        extents = self.fur - self.bbl
+        return 2*(extents.x + extents.y)
+
     def intersection_bbox(self, aabb):
         """
         :type aabb: AABB
@@ -102,15 +108,18 @@ class BBoxNode:
             else:
                 left_box = AABB() if self.left is None else self.left.bbox()
                 right_box = AABB() if self.right is None else self.right.bbox()
-                self.__bbox = left_box.union(right_box).extend(1.1)
+                self.__bbox = left_box.union(right_box)
         return self.__bbox
 
-    def recalc_bbox(self):
-        self.__bbox = None
+    def clear_bbox_cache(self):
+        self.clear_local_bbox_cache()
         if self.left:
-            self.left.recalc_bbox()
+            self.left.clear_bbox_cache()
         if self.right:
-            self.right.recalc_bbox()
+            self.right.clear_bbox_cache()
+
+    def clear_local_bbox_cache(self):
+        self.__bbox = None
 
     def height(self):
         def h(node):
@@ -143,11 +152,17 @@ class BBoxTree:
         if not self.root:
             self.root = BBoxNode(obj)
         else:
+            obj_box = obj.bbox()
+
             def insert(node):
                 """
                 :type node: BBoxNode
                 """
-                to_left = random.choice([True, False])
+                node.clear_local_bbox_cache()
+                if node.obj:
+                    to_left = obj_box.bbl.x < node.obj.bbox().bbl.x
+                else:
+                    to_left = node.left.bbox().union(obj_box).perimeter() < node.right.bbox().union(obj_box).perimeter()
                 if to_left:
                     if node.left:
                         insert(node.left)
@@ -171,7 +186,7 @@ class BBoxTree:
 
     def recalc_bbox(self):
         if self.root:
-            self.root.recalc_bbox()
+            self.root.clear_bbox_cache()
 
     def __query(self, node, bbox, counter):
         """

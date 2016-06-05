@@ -166,7 +166,7 @@ while True:
     frame_start = time.time()
 
     handle_input()
-    process_game(0.003*elapsed / 1000)
+    process_game(0.03*elapsed / 1000)
     render_manager.render()
 
     frame_time = (time.time() - frame_start) * 1000
