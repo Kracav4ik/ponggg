@@ -35,7 +35,7 @@ class Ball:
 
     def bbox(self):
         half_extents = Vec2d(self.r, self.r)
-        return AABB(self.pos + half_extents, self.pos - half_extents)
+        return AABB(bbl=self.pos - half_extents, fur=self.pos + half_extents)
 
     def set_pos(self, pos):
         """

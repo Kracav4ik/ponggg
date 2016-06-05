@@ -1,4 +1,5 @@
 # encoding: utf-8
+from collision import AABB
 from utils import Vec2d, WHITE
 
 
@@ -19,3 +20,6 @@ class Blackground:
         frame_color = WHITE
 
         screen.draw_frame(frame_color, self.pos.x, self.pos.y, self.dims.x, self.dims.y, frame_thickness)
+
+    def bbox(self):
+        return AABB(self.pos, self.pos + self.dims)

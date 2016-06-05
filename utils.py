@@ -126,7 +126,7 @@ def min_coords(v1, v2):
     :type v1: Vec2d
     :type v2: Vec2d
     """
-    return apply2(v1, v2, min)
+    return Vec2d(min(v1.data[0], v2.data[0]), min(v1.data[1], v2.data[1]))
 
 
 def max_coords(v1, v2):
@@ -134,7 +134,7 @@ def max_coords(v1, v2):
     :type v1: Vec2d
     :type v2: Vec2d
     """
-    return apply2(v1, v2, max)
+    return Vec2d(max(v1.data[0], v2.data[0]), max(v1.data[1], v2.data[1]))
 
 
 def unit_vector(angle):

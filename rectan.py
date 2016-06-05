@@ -25,7 +25,7 @@ class Rect:
         screen.draw_frame(self.color*1.5, x, y, w, h)
 
     def bbox(self):
-        return AABB(self.pos + self.half_extents, self.pos - self.half_extents)
+        return AABB(bbl=self.pos - self.half_extents, fur=self.pos + self.half_extents)
 
     def set_pos(self, pos):
         """

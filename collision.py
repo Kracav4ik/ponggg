@@ -5,10 +5,10 @@ from utils import Vec2d, dot, cross, component_mul, max_coords, min_coords, Colo
 
 
 class AABB:
-    def __init__(self, *points):
-        self.bbl = None
+    def __init__(self, *points, bbl=None, fur=None):
+        self.bbl = bbl
         ":type: Vec2d|None"
-        self.fur = None
+        self.fur = fur
         ":type: Vec2d|None"
 
         for point in points:
@@ -42,20 +42,20 @@ class AABB:
         :type aabb: AABB
         :rtype : AABB
         """
-        return AABB(self.bbl, self.fur, aabb.bbl, aabb.fur)
+        new_bbl = min_coords(self.bbl, aabb.bbl)
+        new_fur = max_coords(self.fur, aabb.fur)
+        return AABB(bbl=new_bbl, fur=new_fur)
 
     def intersection(self, aabb):
         """
         :type aabb: AABB
         """
-        result = AABB()
         if self and aabb:
             new_bbl = max_coords(self.bbl, aabb.bbl)
             new_fur = min_coords(self.fur, aabb.fur)
             if new_bbl.x <= new_fur.x and new_bbl.y <= new_fur.y:
-                result.add(new_bbl)
-                result.add(new_fur)
-        return result
+                return AABB(bbl=new_bbl, fur=new_fur)
+        return AABB()
 
     def extend(self, value):
         """Увеличивает размер ббокса в value раз
@@ -63,10 +63,14 @@ class AABB:
         """
         if not self:
             return self
-        center = (self.bbl + self.fur) / 2
-        bbl = center + (self.bbl - center)*value
-        fur = center + (self.fur - center)*value
-        return AABB(bbl, fur)
+        # center = (self.bbl + self.fur) / 2
+        # bbl = center + (self.bbl - center)*value
+        # fur = center + (self.fur - center)*value
+        k_minus = (1 - value) / 2
+        k_plus = (1 + value) / 2
+        bbl = self.bbl * k_plus + self.fur * k_minus
+        fur = self.bbl * k_minus + self.fur * k_plus
+        return AABB(bbl=bbl, fur=fur)
 
 
 class BBoxNode:
@@ -145,7 +149,19 @@ class BBoxTree:
         """
         :type bbox: AABB
         """
-        return []
+        def query(node):
+            """
+            :type node: BBoxNode
+            """
+            if not node:
+                return []
+            if bbox.intersection(node.bbox()):
+                if node.obj:
+                    return [node.obj]
+                else:
+                    return query(node.left) + query(node.right)
+            return []
+        return query(self.root)
 
     def render(self, screen):
         """
